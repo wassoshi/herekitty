@@ -1,15 +1,13 @@
 {
   "name": "herekitty",
   "version": "1.0.0",
-  "description": "moonrat quick ref",
   "main": "herekitty.js",
-  "engines": {
-    "node": ">=18.x"
-  },
+  "type": "module",
   "scripts": {
-    "start": "herekitty.js"
+    "start": "node herekitty.js"
   },
   "dependencies": {
+    "dotenv": "^10.0.0",
     "discord.js": "^14.0.0",
     "node-fetch": "^3.0.0"
   }
