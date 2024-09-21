@@ -24,7 +24,7 @@ client.on('messageCreate', async (message) => {
   if (message.content.startsWith('!')) {
     const tokenId = message.content.slice(1);  // Extract the token ID from the message
 
-    // Prevent duplicate responses
+    // Prevent invalid token IDs
     if (!/^\d+$/.test(tokenId)) {
       return message.channel.send("Invalid token ID. Please enter a valid number.");
     }
@@ -36,9 +36,9 @@ client.on('messageCreate', async (message) => {
 
       if (moonCatDetails && imageUrl) {
         const rescueIndex = moonCatDetails.details.rescueIndex;
-        const hexId = moonCatDetails.catId; // Get hex ID from catId
+        const hexId = moonCatDetails.details.catId; // Fetch hexId from 'details.catId'
 
-        // Extract the name and strip the "accessorized" part if it exists
+        // Extract the name and strip "accessorized" part if it exists
         let name = moonCatDetails.details.name;
         if (name) {
           name = name.replace(" (accessorized)", ""); // Strip "accessorized"
