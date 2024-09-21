@@ -1,1 +1,1 @@
-worker: !herekitty.js
+worker: node herekitty.js
