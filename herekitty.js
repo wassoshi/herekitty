@@ -36,8 +36,13 @@ client.on('messageCreate', async (message) => {
 
       if (moonCatDetails && imageUrl) {
         const rescueIndex = moonCatDetails.details.rescueIndex;
-        const hexId = `0x${parseInt(tokenId).toString(16).toUpperCase().padStart(5, '0')}`;
-        const name = moonCatDetails.details.name;
+        const hexId = moonCatDetails.catId; // Get hex ID from catId
+
+        // Extract the name and strip the "accessorized" part if it exists
+        let name = moonCatDetails.details.name;
+        if (name) {
+          name = name.replace(" (accessorized)", ""); // Strip "accessorized"
+        }
 
         // Set the title based on whether the cat is named or not
         const title = name ? `${name} (MoonCat #${rescueIndex})` : `MoonCat #${rescueIndex}: ${hexId}`;
