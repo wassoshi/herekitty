@@ -6,9 +6,9 @@ dotenv.config();
 
 const client = new Client({
   intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
+    GatewayIntentBits.Guilds, // Access to guilds (servers)
+    GatewayIntentBits.GuildMessages, // Access to guild messages
+    GatewayIntentBits.MessageContent // Access to the content of the messages
   ]
 });
 
@@ -17,42 +17,54 @@ client.once('ready', () => {
 });
 
 client.on('messageCreate', async (message) => {
-
+  // Ignore messages from bots
   if (message.author.bot) return;
 
+  // Ensure the message starts with '!'
   if (message.content.startsWith('!')) {
-    const tokenId = message.content.slice(1);
+    const tokenId = message.content.slice(1);  // Extract the token ID from the message
+
+    // Prevent duplicate responses
+    if (!/^\d+$/.test(tokenId)) {
+      return message.channel.send("Invalid token ID. Please enter a valid number.");
+    }
 
     try {
+      // Fetch MoonCat image URL and metadata
       const moonCatDetails = await getMoonCatNameOrId(tokenId);
       const imageUrl = await getMoonCatImageURL(tokenId);
 
       if (moonCatDetails && imageUrl) {
         const rescueIndex = moonCatDetails.details.rescueIndex;
-        const hexId = tokenId.startsWith('0x') ? tokenId : `0x${parseInt(tokenId).toString(16).padStart(5, '0')}`;
-        const name = moonCatDetails.details.name || `MoonCat #${rescueIndex}`;
+        const hexId = `0x${parseInt(tokenId).toString(16).toUpperCase().padStart(5, '0')}`;
+        const name = moonCatDetails.details.name;
+
+        // Set the title based on whether the cat is named or not
+        const title = name ? `${name} (MoonCat #${rescueIndex})` : `MoonCat #${rescueIndex}: ${hexId}`;
 
         const chainStationLink = `https://chainstation.mooncatrescue.com/mooncats/${tokenId}`;
 
+        // Send the response to Discord
         const embed = {
           color: 3447003,
-          title: `${name} (MoonCat #${rescueIndex}: ${hexId})`,
+          title: title,
           url: chainStationLink,
           image: { url: imageUrl }
         };
-        message.channel.send({ embeds: [embed] });
+        await message.channel.send({ embeds: [embed] });
       } else {
-        message.channel.send(`Sorry, I couldn't find details for MoonCat with token ID: ${tokenId}`);
+        await message.channel.send(`Sorry, I couldn't find details for MoonCat with token ID: ${tokenId}`);
       }
     } catch (error) {
       console.error('Error fetching MoonCat details:', error);
-      message.channel.send('An error occurred while retrieving MoonCat details.');
+      await message.channel.send('An error occurred while retrieving MoonCat details.');
     }
   }
 });
 
 client.login(process.env.DISCORD_TOKEN);
 
+// Function to fetch the MoonCat's name or ID
 async function getMoonCatNameOrId(tokenId) {
   console.log(`Fetching MoonCat name or ID for tokenId: ${tokenId}`);
   const tokenIdStr = tokenId.toString();
@@ -72,6 +84,7 @@ async function getMoonCatNameOrId(tokenId) {
   }
 }
 
+// Function to fetch the MoonCat's image URL
 async function getMoonCatImageURL(tokenId) {
   console.log(`Fetching MoonCat image URL for tokenId: ${tokenId}`);
   try {
