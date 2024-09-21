@@ -6,9 +6,9 @@ dotenv.config();
 
 const client = new Client({
   intents: [
-    GatewayIntentBits.Guilds, // Access to guilds (servers)
-    GatewayIntentBits.GuildMessages, // Access to guild messages
-    GatewayIntentBits.MessageContent // Access to the content of the messages
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent
   ]
 });
 
@@ -17,29 +17,28 @@ client.once('ready', () => {
 });
 
 client.on('messageCreate', async (message) => {
-  // Ignore messages from bots
+
   if (message.author.bot) return;
 
-  // Check if the message starts with '!'
   if (message.content.startsWith('!')) {
-    const tokenId = message.content.slice(1);  // Extract the token ID from the message
+    const tokenId = message.content.slice(1);
 
     try {
-      // Fetch MoonCat image URL and metadata
       const moonCatDetails = await getMoonCatNameOrId(tokenId);
       const imageUrl = await getMoonCatImageURL(tokenId);
 
       if (moonCatDetails && imageUrl) {
-        const name = moonCatDetails.details.name || `MoonCat #${moonCatDetails.details.rescueIndex}`;
+        const rescueIndex = moonCatDetails.details.rescueIndex;
+        const hexId = tokenId.startsWith('0x') ? tokenId : `0x${parseInt(tokenId).toString(16).padStart(5, '0')}`;
+        const name = moonCatDetails.details.name || `MoonCat #${rescueIndex}`;
+
         const chainStationLink = `https://chainstation.mooncatrescue.com/mooncats/${tokenId}`;
 
-        // Send the response to Discord
         const embed = {
           color: 3447003,
-          title: `${name} (Token ID: ${tokenId})`,
+          title: `${name} (MoonCat #${rescueIndex}: ${hexId})`,
           url: chainStationLink,
-          image: { url: imageUrl },
-          description: `View this MoonCat on [ChainStation](${chainStationLink})`,
+          image: { url: imageUrl }
         };
         message.channel.send({ embeds: [embed] });
       } else {
@@ -54,7 +53,6 @@ client.on('messageCreate', async (message) => {
 
 client.login(process.env.DISCORD_TOKEN);
 
-// Function to fetch the MoonCat's name or ID
 async function getMoonCatNameOrId(tokenId) {
   console.log(`Fetching MoonCat name or ID for tokenId: ${tokenId}`);
   const tokenIdStr = tokenId.toString();
@@ -74,7 +72,6 @@ async function getMoonCatNameOrId(tokenId) {
   }
 }
 
-// Function to fetch the MoonCat's image URL
 async function getMoonCatImageURL(tokenId) {
   console.log(`Fetching MoonCat image URL for tokenId: ${tokenId}`);
   try {
