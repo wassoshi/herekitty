@@ -1,33 +1,54 @@
-import { Client, GatewayIntentBits } from 'discord.js';
+import { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from 'discord.js';
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
+// Create the client with appropriate intents
 const client = new Client({
   intents: [
-    GatewayIntentBits.Guilds, // Access to guilds (servers)
-    GatewayIntentBits.GuildMessages, // Access to guild messages
-    GatewayIntentBits.MessageContent // Access to the content of the messages
+    GatewayIntentBits.Guilds // Only need access to guilds for slash commands
   ]
 });
 
-client.once('ready', () => {
+// Register the slash command on bot startup
+const commands = [
+  new SlashCommandBuilder()
+    .setName('mc')
+    .setDescription('Fetch details for a specific MoonCat')
+    .addIntegerOption(option => 
+      option.setName('tokenid')
+        .setDescription('The MoonCat token ID')
+        .setRequired(true))
+].map(command => command.toJSON());
+
+// Register the slash command with Discord
+const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
+
+client.once('ready', async () => {
+  try {
+    console.log('Started refreshing application (/) commands.');
+
+    await rest.put(
+      Routes.applicationGuildCommands(client.user.id, process.env.GUILD_ID), // Replace GUILD_ID with your guild ID
+      { body: commands }
+    );
+
+    console.log('Successfully reloaded application (/) commands.');
+  } catch (error) {
+    console.error(error);
+  }
   console.log('Discord bot is ready!');
 });
 
-client.on('messageCreate', async (message) => {
-  // Ignore messages from bots
-  if (message.author.bot) return;
+// Handle the slash command interaction
+client.on('interactionCreate', async interaction => {
+  if (!interaction.isCommand()) return;
 
-  // Ensure the message starts with '!'
-  if (message.content.startsWith('!')) {
-    const tokenId = message.content.slice(1);  // Extract the token ID from the message
+  const { commandName, options } = interaction;
 
-    // Prevent invalid token IDs
-    if (!/^\d+$/.test(tokenId)) {
-      return message.channel.send("Invalid token ID. Please enter a valid number.");
-    }
+  if (commandName === 'mc') {
+    const tokenId = options.getInteger('tokenid'); // Extract the token ID
 
     try {
       // Fetch MoonCat image URL and metadata
@@ -56,17 +77,18 @@ client.on('messageCreate', async (message) => {
           url: chainStationLink,
           image: { url: imageUrl }
         };
-        await message.channel.send({ embeds: [embed] });
+        await interaction.reply({ embeds: [embed] });
       } else {
-        await message.channel.send(`Sorry, I couldn't find details for MoonCat with token ID: ${tokenId}`);
+        await interaction.reply(`Sorry, I couldn't find details for MoonCat with token ID: ${tokenId}`);
       }
     } catch (error) {
       console.error('Error fetching MoonCat details:', error);
-      await message.channel.send('An error occurred while retrieving MoonCat details.');
+      await interaction.reply('An error occurred while retrieving MoonCat details.');
     }
   }
 });
 
+// Log in to Discord with your bot token
 client.login(process.env.DISCORD_TOKEN);
 
 // Function to fetch the MoonCat's name or ID
