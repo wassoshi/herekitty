@@ -4,14 +4,12 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Create the client with appropriate intents
 const client = new Client({
   intents: [
-    GatewayIntentBits.Guilds // Only need access to guilds for slash commands
+    GatewayIntentBits.Guilds
   ]
 });
 
-// Register the slash command on bot startup
 const commands = [
   new SlashCommandBuilder()
     .setName('mc')
@@ -22,7 +20,6 @@ const commands = [
         .setRequired(true))
 ].map(command => command.toJSON());
 
-// Register the slash command with Discord
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
 
 client.once('ready', async () => {
@@ -30,7 +27,7 @@ client.once('ready', async () => {
     console.log('Started refreshing application (/) commands.');
 
     await rest.put(
-      Routes.applicationGuildCommands(client.user.id, process.env.GUILD_ID), // Replace GUILD_ID with your guild ID
+      Routes.applicationGuildCommands(client.user.id, process.env.GUILD_ID),
       { body: commands }
     );
 
@@ -41,36 +38,31 @@ client.once('ready', async () => {
   console.log('Discord bot is ready!');
 });
 
-// Handle the slash command interaction
 client.on('interactionCreate', async interaction => {
   if (!interaction.isCommand()) return;
 
   const { commandName, options } = interaction;
 
   if (commandName === 'mc') {
-    const tokenId = options.getInteger('tokenid'); // Extract the token ID
+    const tokenId = options.getInteger('tokenid');
 
     try {
-      // Fetch MoonCat image URL and metadata
       const moonCatDetails = await getMoonCatNameOrId(tokenId);
       const imageUrl = await getMoonCatImageURL(tokenId);
 
       if (moonCatDetails && imageUrl) {
         const rescueIndex = moonCatDetails.details.rescueIndex;
-        const hexId = moonCatDetails.details.catId; // Fetch hexId from 'details.catId'
+        const hexId = moonCatDetails.details.catId;
 
-        // Extract the name and strip "accessorized" part if it exists
         let name = moonCatDetails.details.name;
         if (name) {
-          name = name.replace(" (accessorized)", ""); // Strip "accessorized"
+          name = name.replace(" (accessorized)", "");
         }
 
-        // Set the title based on whether the cat is named or not
         const title = name ? `${name} (MoonCat #${rescueIndex})` : `MoonCat #${rescueIndex}: ${hexId}`;
 
         const chainStationLink = `https://chainstation.mooncatrescue.com/mooncats/${tokenId}`;
 
-        // Send the response to Discord
         const embed = {
           color: 3447003,
           title: title,
@@ -88,10 +80,8 @@ client.on('interactionCreate', async interaction => {
   }
 });
 
-// Log in to Discord with your bot token
 client.login(process.env.DISCORD_TOKEN);
 
-// Function to fetch the MoonCat's name or ID
 async function getMoonCatNameOrId(tokenId) {
   console.log(`Fetching MoonCat name or ID for tokenId: ${tokenId}`);
   const tokenIdStr = tokenId.toString();
@@ -111,7 +101,6 @@ async function getMoonCatNameOrId(tokenId) {
   }
 }
 
-// Function to fetch the MoonCat's image URL
 async function getMoonCatImageURL(tokenId) {
   console.log(`Fetching MoonCat image URL for tokenId: ${tokenId}`);
   try {
