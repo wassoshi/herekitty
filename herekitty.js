@@ -1,4 +1,5 @@
 import { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from 'discord.js';
+import { AlchemyProvider, Contract } from 'ethers';
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 
@@ -24,6 +25,13 @@ const commands = [
     .addIntegerOption(option => 
       option.setName('tokenid')
         .setDescription('The token ID for the DNA image')
+        .setRequired(true)),
+  new SlashCommandBuilder()
+    .setName('wrp')
+    .setDescription('Fetch rescue index from old wrapper token ID')
+    .addIntegerOption(option => 
+      option.setName('tokenid')
+        .setDescription('The old wrapper token ID')
         .setRequired(true))
 ].map(command => command.toJSON());
 
@@ -101,9 +109,54 @@ client.on('interactionCreate', async interaction => {
       await interaction.reply('An error occurred while retrieving the DNA image.');
     }
   }
+
+  if (commandName === 'wrp') {
+    const tokenId = options.getInteger('tokenid');
+
+    try {
+      const rescueIndex = await getRescueIndexFromWrapper(tokenId);
+
+      if (rescueIndex) {
+        await interaction.reply(`${rescueIndex}`);
+      } else {
+        await interaction.reply('Could not fetch rescue index.');
+      }
+    } catch (error) {
+      console.error('Error fetching rescue index from wrapper token:', error);
+      await interaction.reply('An error occurred while retrieving the rescue index.');
+    }
+  }
 });
 
 client.login(process.env.DISCORD_TOKEN);
+
+async function getRescueIndexFromWrapper(tokenId) {
+  const provider = new AlchemyProvider('homestead', process.env.ALCHEMY_API_KEY);
+  const OLD_WRAPPER_CONTRACT_ADDRESS = '0x7c40c393dc0f283f318791d746d894ddd3693572';
+  const OLD_WRAPPER_CONTRACT_ABI = [
+    {
+      "inputs": [{ "internalType": "uint256", "name": "tokenId", "type": "uint256" }],
+      "name": "_tokenIDToCatID",
+      "outputs": [{ "internalType": "bytes5", "name": "", "type": "bytes5" }],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ];
+  const contract = new Contract(OLD_WRAPPER_CONTRACT_ADDRESS, OLD_WRAPPER_CONTRACT_ABI, provider);
+
+  try {
+    const realTokenIdHex = await contract._tokenIDToCatID(tokenId);
+    const realTokenId = parseInt(realTokenIdHex, 16);
+    const moonCatDetails = await getMoonCatNameOrId(realTokenId);
+    if (moonCatDetails && moonCatDetails.details && moonCatDetails.details.rescueIndex) {
+      return moonCatDetails.details.rescueIndex;
+    }
+    return null;
+  } catch (error) {
+    console.error(`Error fetching real token ID for wrapped token ${tokenId}:`, error);
+    return null;
+  }
+}
 
 async function getMoonCatNameOrId(tokenId) {
   const tokenIdStr = tokenId.toString();
