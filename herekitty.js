@@ -117,7 +117,7 @@ client.on('interactionCreate', async interaction => {
       const rescueIndex = await getRescueIndexFromWrapper(tokenId);
 
       if (rescueIndex) {
-        await interaction.reply(`${rescueIndex}`);
+        await interaction.reply(`Rescue Index: ${rescueIndex}`);
       } else {
         await interaction.reply('Could not fetch rescue index.');
       }
@@ -129,7 +129,6 @@ client.on('interactionCreate', async interaction => {
 });
 
 client.login(process.env.DISCORD_TOKEN);
-
 
 async function getRescueIndexFromWrapper(tokenId) {
   const provider = new AlchemyProvider('homestead', process.env.ALCHEMY_API_KEY);
@@ -146,19 +145,28 @@ async function getRescueIndexFromWrapper(tokenId) {
   const contract = new Contract(OLD_WRAPPER_CONTRACT_ADDRESS, OLD_WRAPPER_CONTRACT_ABI, provider);
 
   try {
-    const realTokenIdHex = await contract._tokenIDToCatID(tokenId);
-    const realTokenId = parseInt(realTokenIdHex, 16);
-    const moonCatDetails = await getMoonCatNameOrId(realTokenId);
-    if (moonCatDetails && moonCatDetails.details && moonCatDetails.details.rescueIndex) {
-      return moonCatDetails.details.rescueIndex;
-    }
-    return null;
+    const realTokenIdHex = await contract._tokenIDToCatID(tokenId);  // Fetch the real token ID (catId)
+    const rescueIndex = await fetchRescueIndex(realTokenIdHex);       // Fetch the rescue index
+    return rescueIndex;
   } catch (error) {
     console.error(`Error fetching real token ID for wrapped token ${tokenId}:`, error);
     return null;
   }
 }
 
+async function fetchRescueIndex(realTokenIdHex) {
+  try {
+    const response = await fetch(`https://api.mooncat.community/traits/${realTokenIdHex}`); // Fetch the details
+    if (!response.ok) {
+      throw new Error(`Failed to fetch MoonCat details: ${response.statusText}`);
+    }
+    const data = await response.json();
+    return data.details.rescueIndex;  // Return the rescue index
+  } catch (error) {
+    console.error('Error fetching rescue index:', error);
+    return null;
+  }
+}
 
 async function getMoonCatNameOrId(tokenId) {
   const tokenIdStr = tokenId.toString();
@@ -176,7 +184,6 @@ async function getMoonCatNameOrId(tokenId) {
   }
 }
 
-
 async function getMoonCatImageURL(tokenId) {
   try {
     const response = await fetch(`https://api.mooncat.community/regular-image/${tokenId}`);
@@ -189,7 +196,6 @@ async function getMoonCatImageURL(tokenId) {
     return null;
   }
 }
-
 
 async function getDNAImageURL(tokenId) {
   try {
