@@ -1,5 +1,5 @@
 import pkg from 'ethers';
-const { AlchemyProvider, Contract } = pkg;
+const { providers, Contract } = pkg;
 
 import fetch from 'node-fetch';
 import { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from 'discord.js';
