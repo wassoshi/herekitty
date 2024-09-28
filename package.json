@@ -9,7 +9,7 @@
   "dependencies": {
     "dotenv": "^10.0.0",
     "discord.js": "^14.0.0",
-    "node-fetch": "^3.0.0",
-    "ethers": "^5.6.0"
+    "node-fetch": "^*",
+    "ethers": "^6.6.2"
   }
 }
