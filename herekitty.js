@@ -17,6 +17,13 @@ const commands = [
     .addIntegerOption(option => 
       option.setName('tokenid')
         .setDescription('The MoonCat token ID')
+        .setRequired(true)),
+  new SlashCommandBuilder()
+    .setName('dna')
+    .setDescription('Fetch DNA image for a specific token')
+    .addIntegerOption(option => 
+      option.setName('tokenid')
+        .setDescription('The token ID for the DNA image')
         .setRequired(true))
 ].map(command => command.toJSON());
 
@@ -24,14 +31,10 @@ const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
 
 client.once('ready', async () => {
   try {
-    console.log('Started refreshing application (/) commands.');
-
     await rest.put(
       Routes.applicationGuildCommands(client.user.id, process.env.GUILD_ID),
       { body: commands }
     );
-
-    console.log('Successfully reloaded application (/) commands.');
   } catch (error) {
     console.error(error);
   }
@@ -78,12 +81,31 @@ client.on('interactionCreate', async interaction => {
       await interaction.reply('An error occurred while retrieving MoonCat details.');
     }
   }
+
+  if (commandName === 'dna') {
+    const tokenId = options.getInteger('tokenid');
+
+    try {
+      const dnaImageUrl = await getDNAImageURL(tokenId);
+
+      if (dnaImageUrl) {
+        const embed = {
+          image: { url: dnaImageUrl }
+        };
+        await interaction.reply({ embeds: [embed] });
+      } else {
+        await interaction.reply(`Sorry, I couldn't fetch the DNA image for token ID: ${tokenId}`);
+      }
+    } catch (error) {
+      console.error('Error fetching DNA image URL:', error);
+      await interaction.reply('An error occurred while retrieving the DNA image.');
+    }
+  }
 });
 
 client.login(process.env.DISCORD_TOKEN);
 
 async function getMoonCatNameOrId(tokenId) {
-  console.log(`Fetching MoonCat name or ID for tokenId: ${tokenId}`);
   const tokenIdStr = tokenId.toString();
   const tokenIdHex = tokenIdStr.startsWith('0x') ? tokenIdStr.slice(2) : tokenIdStr;
 
@@ -93,26 +115,30 @@ async function getMoonCatNameOrId(tokenId) {
       throw new Error(`Failed to fetch MoonCat details: ${response.statusText}`);
     }
     const data = await response.json();
-    console.log(`Fetched MoonCat details for tokenId: ${tokenId}:`, data);
     return data;
   } catch (error) {
-    console.error(`Error fetching MoonCat name or ID for token ${tokenIdHex}:`, error);
     return null;
   }
 }
 
 async function getMoonCatImageURL(tokenId) {
-  console.log(`Fetching MoonCat image URL for tokenId: ${tokenId}`);
   try {
     const response = await fetch(`https://api.mooncat.community/regular-image/${tokenId}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch MoonCat image: ${response.statusText}`);
     }
     const imageUrl = response.url;
-    console.log(`Fetched image URL for tokenId: ${tokenId}: ${imageUrl}`);
     return imageUrl;
   } catch (error) {
-    console.error('Error fetching MoonCat image URL:', error);
+    return null;
+  }
+}
+
+async function getDNAImageURL(tokenId) {
+  try {
+    const dnaUrl = `https://ipfs.io/ipfs/bafybeicp3ke3rrhakwlre4gexzcjx7uxotvtscda7kz3wdbkxa5usrbmwu/${tokenId}.png`;
+    return dnaUrl;
+  } catch (error) {
     return null;
   }
 }
