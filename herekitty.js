@@ -1,6 +1,8 @@
-import { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from 'discord.js';
-import { AlchemyProvider, Contract } from 'ethers';
+import pkg from 'ethers';
+const { AlchemyProvider, Contract } = pkg;
+
 import fetch from 'node-fetch';
+import { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from 'discord.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
