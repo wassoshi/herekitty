@@ -117,7 +117,7 @@ client.on('interactionCreate', async interaction => {
       const rescueIndex = await getRescueIndexFromWrapper(tokenId);
 
       if (rescueIndex) {
-        await interaction.reply(`Rescue Index: ${rescueIndex}`);
+        await interaction.reply(`rescue Index: ${rescueIndex}`);
       } else {
         await interaction.reply('Could not fetch rescue index.');
       }
