@@ -1,6 +1,4 @@
-import pkg from 'ethers';
-const { providers, Contract } = pkg;
-
+import { AlchemyProvider, Contract } from 'ethers';
 import fetch from 'node-fetch';
 import { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from 'discord.js';
 import dotenv from 'dotenv';
@@ -132,6 +130,7 @@ client.on('interactionCreate', async interaction => {
 
 client.login(process.env.DISCORD_TOKEN);
 
+
 async function getRescueIndexFromWrapper(tokenId) {
   const provider = new AlchemyProvider('homestead', process.env.ALCHEMY_API_KEY);
   const OLD_WRAPPER_CONTRACT_ADDRESS = '0x7c40c393dc0f283f318791d746d894ddd3693572';
@@ -160,6 +159,7 @@ async function getRescueIndexFromWrapper(tokenId) {
   }
 }
 
+
 async function getMoonCatNameOrId(tokenId) {
   const tokenIdStr = tokenId.toString();
   const tokenIdHex = tokenIdStr.startsWith('0x') ? tokenIdStr.slice(2) : tokenIdStr;
@@ -176,6 +176,7 @@ async function getMoonCatNameOrId(tokenId) {
   }
 }
 
+
 async function getMoonCatImageURL(tokenId) {
   try {
     const response = await fetch(`https://api.mooncat.community/regular-image/${tokenId}`);
@@ -188,6 +189,7 @@ async function getMoonCatImageURL(tokenId) {
     return null;
   }
 }
+
 
 async function getDNAImageURL(tokenId) {
   try {
