@@ -199,7 +199,7 @@ async function getMoonCatImageURL(tokenId) {
 
 async function getDNAImageURL(tokenId) {
   try {
-    const dnaUrl = `https://ipfs.io/ipfs/bafybeicp3ke3rrhakwlre4gexzcjx7uxotvtscda7kz3wdbkxa5usrbmwu/${tokenId}.png`;
+    const dnaUrl = `https://ipfs.io/ipfs/bafybeibsfarvkx7cowc2uta55mw76aczjqkund6htjiq5pzvg4ljr7yeqi/${tokenId}.png`;
     return dnaUrl;
   } catch (error) {
     return null;
