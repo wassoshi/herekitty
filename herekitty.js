@@ -205,3 +205,33 @@ async function getDNAImageURL(tokenId) {
     return null;
   }
 }
+
+client.on('interactionCreate', async interaction => {
+  if (!interaction.isCommand()) return;
+
+  const { commandName, options } = interaction;
+
+  if (commandName === 'dna') {
+    const tokenId = options.getInteger('tokenid');
+
+    try {
+      const dnaImageUrl = await getDNAImageURL(tokenId);
+
+      if (dnaImageUrl) {
+        await interaction.reply({ content: 'Fetching DNA image, please wait...' });
+
+        setTimeout(async () => {
+          const embed = {
+            image: { url: dnaImageUrl }
+          };
+          await interaction.editReply({ embeds: [embed] });
+        }, 3000);
+      } else {
+        await interaction.reply(`Sorry, I couldn't fetch the DNA image for token ID: ${tokenId}`);
+      }
+    } catch (error) {
+      console.error('Error fetching DNA image URL:', error);
+      await interaction.reply('An error occurred while retrieving the DNA image.');
+    }
+  }
+});
