@@ -97,10 +97,14 @@ client.on('interactionCreate', async interaction => {
       const dnaImageUrl = await getDNAImageURL(tokenId);
 
       if (dnaImageUrl) {
-        const embed = {
-          image: { url: dnaImageUrl }
-        };
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ content: 'Fetching DNA image, please wait...' });
+
+        setTimeout(async () => {
+          const embed = {
+            image: { url: dnaImageUrl }
+          };
+          await interaction.editReply({ embeds: [embed] });
+        }, 6000);
       } else {
         await interaction.reply(`Sorry, I couldn't fetch the DNA image for token ID: ${tokenId}`);
       }
@@ -145,8 +149,8 @@ async function getRescueIndexFromWrapper(tokenId) {
   const contract = new Contract(OLD_WRAPPER_CONTRACT_ADDRESS, OLD_WRAPPER_CONTRACT_ABI, provider);
 
   try {
-    const realTokenIdHex = await contract._tokenIDToCatID(tokenId);  // Fetch the real token ID (catId)
-    const rescueIndex = await fetchRescueIndex(realTokenIdHex);       // Fetch the rescue index
+    const realTokenIdHex = await contract._tokenIDToCatID(tokenId);
+    const rescueIndex = await fetchRescueIndex(realTokenIdHex);
     return rescueIndex;
   } catch (error) {
     console.error(`Error fetching real token ID for wrapped token ${tokenId}:`, error);
@@ -156,12 +160,12 @@ async function getRescueIndexFromWrapper(tokenId) {
 
 async function fetchRescueIndex(realTokenIdHex) {
   try {
-    const response = await fetch(`https://api.mooncat.community/traits/${realTokenIdHex}`); // Fetch the details
+    const response = await fetch(`https://api.mooncat.community/traits/${realTokenIdHex}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch MoonCat details: ${response.statusText}`);
     }
     const data = await response.json();
-    return data.details.rescueIndex;  // Return the rescue index
+    return data.details.rescueIndex;
   } catch (error) {
     console.error('Error fetching rescue index:', error);
     return null;
@@ -202,36 +206,7 @@ async function getDNAImageURL(tokenId) {
     const dnaUrl = `https://ipfs.infura.io/ipfs/bafybeibsfarvkx7cowc2uta55mw76aczjqkund6htjiq5pzvg4ljr7yeqi/${tokenId}.png`;
     return dnaUrl;
   } catch (error) {
+    console.error('Error fetching DNA image URL:', error);
     return null;
   }
 }
-
-client.on('interactionCreate', async interaction => {
-  if (!interaction.isCommand()) return;
-
-  const { commandName, options } = interaction;
-
-  if (commandName === 'dna') {
-    const tokenId = options.getInteger('tokenid');
-
-    try {
-      const dnaImageUrl = await getDNAImageURL(tokenId);
-
-      if (dnaImageUrl) {
-        await interaction.reply({ content: 'Fetching DNA image, please wait...' });
-
-        setTimeout(async () => {
-          const embed = {
-            image: { url: dnaImageUrl }
-          };
-          await interaction.editReply({ embeds: [embed] });
-        }, 6000);
-      } else {
-        await interaction.reply(`Sorry, I couldn't fetch the DNA image for token ID: ${tokenId}`);
-      }
-    } catch (error) {
-      console.error('Error fetching DNA image URL:', error);
-      await interaction.reply('An error occurred while retrieving the DNA image.');
-    }
-  }
-});
