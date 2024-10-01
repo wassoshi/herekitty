@@ -225,7 +225,7 @@ client.on('interactionCreate', async interaction => {
             image: { url: dnaImageUrl }
           };
           await interaction.editReply({ embeds: [embed] });
-        }, 3000);
+        }, 6000);
       } else {
         await interaction.reply(`Sorry, I couldn't fetch the DNA image for token ID: ${tokenId}`);
       }
