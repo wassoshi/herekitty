@@ -40,7 +40,7 @@ const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
 client.once('ready', async () => {
   try {
     await rest.put(
-      Routes.applicationGuildCommands(client.user.id, process.env.GUILD_ID),
+      Routes.applicationCommands(client.user.id),
       { body: commands }
     );
   } catch (error) {
@@ -121,7 +121,7 @@ client.on('interactionCreate', async interaction => {
       const rescueIndex = await getRescueIndexFromWrapper(tokenId);
 
       if (rescueIndex) {
-        await interaction.reply(`rescue Index: ${rescueIndex}`);
+        await interaction.reply(`Old-wrapped token ID ${tokenId} is Rescue Order ${rescueIndex}`);
       } else {
         await interaction.reply('Could not fetch rescue index.');
       }
