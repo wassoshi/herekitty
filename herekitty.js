@@ -97,13 +97,8 @@ client.on('interactionCreate', async interaction => {
       const dnaImageUrl = await getDNAImageURL(tokenId);
 
       if (dnaImageUrl) {
-        const embed = {
-          color: 3447003,
-          title: `MoonCat #${tokenId} DNA`,  // Clickable title
-          url: dnaImageUrl,  // Link the title to the DNA image URL
-          image: { url: dnaImageUrl }  // Display the image
-        };
-        await interaction.reply({ embeds: [embed] });
+        const message = `MoonCat #${tokenId} DNA: [Link](${dnaImageUrl})`;
+        await interaction.reply({ content: message });
       } else {
         await interaction.reply(`Sorry, I couldn't fetch the DNA image for MoonCat with token ID: ${tokenId}`);
       }
