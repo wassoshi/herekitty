@@ -97,16 +97,9 @@ client.on('interactionCreate', async interaction => {
       const dnaImageUrl = await getDNAImageURL(tokenId);
 
       if (dnaImageUrl) {
-        await interaction.reply({ content: 'Fetching DNA image, please wait...' });
-
-        setTimeout(async () => {
-          const embed = {
-            image: { url: dnaImageUrl }
-          };
-          await interaction.editReply({ embeds: [embed] });
-        }, 6000);
+        await interaction.reply({ content: `MoonCat #${tokenId} DNA: ${dnaImageUrl}` });
       } else {
-        await interaction.reply(`Sorry, I couldn't fetch the DNA image for token ID: ${tokenId}`);
+        await interaction.reply(`Sorry, I couldn't fetch the DNA image for MoonCat with token ID: ${tokenId}`);
       }
     } catch (error) {
       console.error('Error fetching DNA image URL:', error);
