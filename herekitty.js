@@ -70,7 +70,7 @@ client.on('interactionCreate', async interaction => {
           name = name.replace(" (accessorized)", "");
         }
 
-        const title = name ? `${name}: MoonCat #${rescueIndex}` : `MoonCat #${rescueIndex}: ${hexId}`;
+        const title = name ? `MoonCat #${rescueIndex}: ${name}` : `MoonCat #${rescueIndex}: ${hexId}`;
 
         const chainStationLink = `https://chainstation.mooncatrescue.com/mooncats/${tokenId}`;
 
