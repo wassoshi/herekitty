@@ -97,7 +97,7 @@ client.on('interactionCreate', async interaction => {
       const dnaImageUrl = await getDNAImageURL(tokenId);
 
       if (dnaImageUrl) {
-        const message = `MoonCat #${tokenId} DNA: [Link](${dnaImageUrl})`;
+        const message = `MoonCat #${tokenId} [DNA](${dnaImageUrl})`;
         await interaction.reply({ content: message });
       } else {
         await interaction.reply(`Sorry, I couldn't fetch the DNA image for MoonCat with token ID: ${tokenId}`);
