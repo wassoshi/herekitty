@@ -94,10 +94,20 @@ client.on('interactionCreate', async interaction => {
     const tokenId = options.getInteger('tokenid');
 
     try {
+      const moonCatDetails = await getMoonCatNameOrId(tokenId);
       const dnaImageUrl = await getDNAImageURL(tokenId);
 
       if (dnaImageUrl) {
-        const message = `MoonCat #${tokenId} [DNA](${dnaImageUrl})`;
+        let name = moonCatDetails?.details?.name || null;
+
+        if (name) {
+          name = name.replace(" (accessorized)", "");
+        }
+
+        const title = name ? `${name}: MoonCat #${tokenId}` : `MoonCat #${tokenId}`;
+
+        const message = `${title} [DNA](${dnaImageUrl})`;
+
         await interaction.reply({ content: message });
       } else {
         await interaction.reply(`Sorry, I couldn't fetch the DNA image for MoonCat with token ID: ${tokenId}`);
