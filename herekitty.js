@@ -233,11 +233,7 @@ client.on('interactionCreate', async interaction => {
         await interaction.editReply(`None of the MoonCats with this accessory are currently listed for sale.`);
       }
     }
-  } catch (error) {
-    console.error('Error handling interaction:', error);
-    await interaction.editReply('An error occurred while processing the command.');
-  }
-});
+
 
     if (commandName === 'dna') {
       const tokenId = options.getInteger('tokenid');
