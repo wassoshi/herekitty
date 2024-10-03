@@ -311,16 +311,21 @@ async function checkMoonCatListing(tokenId, delayBetweenCalls = 100) {
     }
 
     const data = await response.json();
-    const lastEvent = data.asset_events[data.asset_events.length - 1];
+    const events = data.asset_events;
 
-    if (lastEvent && lastEvent.event_type === 'order' && lastEvent.order_type === 'listing') {
-      const now = Math.floor(Date.now() / 1000);
+    if (events.length === 0) {
+      console.log(`No events found for token ${tokenId}`);
+      return { isActive: false, tokenId };
+    }
 
-      console.log(`Token ${tokenId}: start_date = ${lastEvent.start_date}, expiration_date = ${lastEvent.expiration_date}, now = ${now}`);
+    const latestEvent = events[0];
+    if (latestEvent.event_type === 'order' && latestEvent.order_type === 'listing') {
+      const now = Math.floor(Date.now() / 1000)
 
-      if (lastEvent.start_date <= now && lastEvent.expiration_date > now) {
-        const price = (parseInt(lastEvent.payment.quantity) / Math.pow(10, lastEvent.payment.decimals)).toFixed(2);
-        console.log(`Listing active for token ${tokenId}, price: ${price} ETH`);
+      console.log(`Token ${tokenId}: start_date = ${latestEvent.start_date}, expiration_date = ${latestEvent.expiration_date}, now = ${now}`);
+
+      if (latestEvent.start_date <= now && latestEvent.expiration_date > now) {
+        const price = (parseInt(latestEvent.payment.quantity) / Math.pow(10, latestEvent.payment.decimals)).toFixed(2);
         return {
           isActive: true,
           tokenId,
@@ -329,6 +334,7 @@ async function checkMoonCatListing(tokenId, delayBetweenCalls = 100) {
         };
       } else {
         console.log(`Listing not active for token ${tokenId}. now = ${now}, start_date = ${lastEvent.start_date}, expiration_date = ${lastEvent.expiration_date}`);
+        return { isActive: false, tokenId };
       }
     }
 
