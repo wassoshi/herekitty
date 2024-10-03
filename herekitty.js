@@ -46,6 +46,13 @@ const commands = [
     .addIntegerOption(option => 
       option.setName('tokenid')
         .setDescription('The old wrapper token ID')
+        .setRequired(true)),
+  new SlashCommandBuilder()
+    .setName('accsale')
+    .setDescription('Check which MoonCats with a specific accessory are listed for sale')
+    .addIntegerOption(option => 
+      option.setName('accessoryid')
+        .setDescription('The accessory ID')
         .setRequired(true))
 ].map(command => command.toJSON());
 
@@ -182,17 +189,30 @@ client.on('interactionCreate', async interaction => {
       }
     }
 
-    async function fetchAccessoryDetails(accessoryId) {
-      try {
-        const response = await fetch(`https://api.mooncatrescue.com/accessory/traits/${accessoryId}`);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch accessory details: ${response.statusText}`);
-        }
-        const data = await response.json();
-        return data;
-      } catch (error) {
-        console.error('Error fetching accessory details:', error);
-        return null;
+    if (commandName === 'accsale') {
+      const accessoryId = options.getInteger('accessoryid');
+      const accessoryDetails = await fetchAccessoryDetails(accessoryId);
+
+      if (!accessoryDetails) {
+        await interaction.editReply(`Could not fetch accessory details for accessory ID: ${accessoryId}`);
+        return;
+      }
+
+      const moonCatOwners = accessoryDetails.ownedBy?.list;
+
+      if (!moonCatOwners || moonCatOwners.length === 0) {
+        await interaction.editReply(`No MoonCats found with accessory ID: ${accessoryId}`);
+        return;
+      }
+
+      const listings = await Promise.all(moonCatOwners.map(owner => checkMoonCatListing(owner.rescueOrder)));
+      const activeListings = listings.filter(listing => listing.isActive);
+
+      if (activeListings.length > 0) {
+        const listingMessages = activeListings.map(listing => `MoonCat #${listing.tokenId} is listed for ${listing.price} ETH: ${listing.url}`);
+        await interaction.editReply(listingMessages.join('\n'));
+      } else {
+        await interaction.editReply(`None of the MoonCats with this accessory are currently listed for sale.`);
       }
     }
 
@@ -240,7 +260,7 @@ client.login(process.env.DISCORD_TOKEN);
 
 async function fetchAccessoryDetails(accessoryId) {
   try {
-    const response = await fetch(`https://api.mooncat.community/accessory/${accessoryId}`);
+    const response = await fetch(`https://api.mooncatrescue.com/accessory/traits/${accessoryId}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch accessory details: ${response.statusText}`);
     }
@@ -249,6 +269,43 @@ async function fetchAccessoryDetails(accessoryId) {
   } catch (error) {
     console.error('Error fetching accessory details:', error);
     return null;
+  }
+}
+
+async function checkMoonCatListing(tokenId) {
+  try {
+    const response = await fetch(`https://api.opensea.io/api/v2/events/chain/ethereum/contract/0xc3f733ca98E0daD0386979Eb96fb1722A1A05E69/nfts/${tokenId}?event_type=listing`, {
+      headers: {
+        'accept': 'application/json',
+        'x-api-key': process.env.OPENSEA_API_KEY
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch OpenSea listings for tokenId ${tokenId}`);
+    }
+
+    const data = await response.json();
+    const lastEvent = data.asset_events[data.asset_events.length - 1];
+
+    if (lastEvent && lastEvent.event_type === 'order' && lastEvent.order_type === 'listing') {
+      const now = Math.floor(Date.now() / 1000);
+
+      if (lastEvent.expiration_date > now) {
+        const price = (parseInt(lastEvent.payment.quantity) / Math.pow(10, lastEvent.payment.decimals)).toFixed(2);
+        return {
+          isActive: true,
+          tokenId,
+          price,
+          url: lastEvent.asset.opensea_url
+        };
+      }
+    }
+
+    return { isActive: false, tokenId };
+  } catch (error) {
+    console.error(`Error fetching listing for tokenId ${tokenId}:`, error);
+    return { isActive: false, tokenId };
   }
 }
 
