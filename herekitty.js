@@ -191,30 +191,53 @@ client.on('interactionCreate', async interaction => {
 
     if (commandName === 'accsale') {
       const accessoryId = options.getInteger('accessoryid');
+      console.log(`Fetching details for accessory ID: ${accessoryId}`);
       const accessoryDetails = await fetchAccessoryDetails(accessoryId);
 
       if (!accessoryDetails) {
+      console.log(`Could not fetch accessory details for accessory ID: ${accessoryId}`);
         await interaction.editReply(`Could not fetch accessory details for accessory ID: ${accessoryId}`);
         return;
       }
-
+      
+      console.log(`Accessory Details for ID ${accessoryId}:`, accessoryDetails);
       const moonCatOwners = accessoryDetails.ownedBy?.list;
+      console.log(`MoonCat owners with this accessory (${accessoryId}):`, moonCatOwners);
 
       if (!moonCatOwners || moonCatOwners.length === 0) {
         await interaction.editReply(`No MoonCats found with accessory ID: ${accessoryId}`);
         return;
       }
+      
+      moonCatOwners.forEach(owner => {
+        console.log(`MoonCat with rescue order ${owner.rescueOrder} owns accessory ID: ${accessoryId}`);
+      });
 
+      console.log(`Checking OpenSea listings for MoonCats with accessory ID: ${accessoryId}`);
       const listings = await Promise.all(moonCatOwners.map(owner => checkMoonCatListing(owner.rescueOrder)));
+
+      listings.forEach(listing => {
+        console.log(`Listing for MoonCat #${listing.tokenId}:`, listing);
+      });
+
       const activeListings = listings.filter(listing => listing.isActive);
 
       if (activeListings.length > 0) {
         const listingMessages = activeListings.map(listing => `MoonCat #${listing.tokenId} is listed for ${listing.price} ETH: ${listing.url}`);
+
+        console.log(`Active listings found:`, listingMessages);
+
         await interaction.editReply(listingMessages.join('\n'));
       } else {
+        console.log(`No active listings found for MoonCats with accessory ID: ${accessoryId}`);
         await interaction.editReply(`None of the MoonCats with this accessory are currently listed for sale.`);
       }
     }
+  } catch (error) {
+    console.error('Error handling interaction:', error);
+    await interaction.editReply('An error occurred while processing the command.');
+  }
+});
 
     if (commandName === 'dna') {
       const tokenId = options.getInteger('tokenid');
