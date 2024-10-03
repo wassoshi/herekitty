@@ -272,7 +272,13 @@ async function fetchAccessoryDetails(accessoryId) {
   }
 }
 
-async function checkMoonCatListing(tokenId) {
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function checkMoonCatListing(tokenId, delayBetweenCalls = 100) {
+  await delay(delayBetweenCalls);
+  
   try {
     const response = await fetch(`https://api.opensea.io/api/v2/events/chain/ethereum/contract/0xc3f733ca98E0daD0386979Eb96fb1722A1A05E69/nfts/${tokenId}?event_type=listing`, {
       headers: {
