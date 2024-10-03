@@ -330,10 +330,10 @@ async function checkMoonCatListing(tokenId, delayBetweenCalls = 100) {
           isActive: true,
           tokenId,
           price,
-          url: lastEvent.asset.opensea_url
+          url: latestEvent.asset.opensea_url
         };
       } else {
-        console.log(`Listing not active for token ${tokenId}. now = ${now}, start_date = ${lastEvent.start_date}, expiration_date = ${lastEvent.expiration_date}`);
+        console.log(`Listing not active for token ${tokenId}. now = ${now}, start_date = ${latestEvent.start_date}, expiration_date = ${latestEvent.expiration_date}`);
         return { isActive: false, tokenId };
       }
     }
