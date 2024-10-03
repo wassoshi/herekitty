@@ -304,3 +304,4 @@ async function getDNAImageURL(tokenId) {
     console.error('Error fetching DNA image URL:', error);
     return null;
   }
+}
