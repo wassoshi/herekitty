@@ -68,10 +68,11 @@ client.on('interactionCreate', async interaction => {
 
   const { commandName, options } = interaction;
 
-  if (commandName === 'mc') {
-    const tokenId = options.getInteger('tokenid');
+  try {
+    await interaction.deferReply(); // Acknowledge the interaction to avoid timeouts
 
-    try {
+    if (commandName === 'mc') {
+      const tokenId = options.getInteger('tokenid');
       const moonCatDetails = await getMoonCatNameOrId(tokenId);
       const imageUrl = await getMoonCatImageURL(tokenId);
 
@@ -94,20 +95,14 @@ client.on('interactionCreate', async interaction => {
           url: chainStationLink,
           image: { url: imageUrl }
         };
-        await interaction.reply({ embeds: [embed] });
+        await interaction.editReply({ embeds: [embed] });
       } else {
-        await interaction.reply(`Sorry, I couldn't find details for MoonCat with token ID: ${tokenId}`);
+        await interaction.editReply(`Sorry, I couldn't find details for MoonCat with token ID: ${tokenId}`);
       }
-    } catch (error) {
-      console.error('Error fetching MoonCat details:', error);
-      await interaction.reply('An error occurred while retrieving MoonCat details.');
     }
-  }
 
-  if (commandName === 'mcacc') {
-    const tokenId = options.getInteger('tokenid');
-
-    try {
+    if (commandName === 'mcacc') {
+      const tokenId = options.getInteger('tokenid');
       const moonCatDetails = await getMoonCatNameOrId(tokenId);
       const accessorizedImageUrl = `https://api.mooncat.community/accessorized-image/${tokenId}.png`;
 
@@ -130,20 +125,14 @@ client.on('interactionCreate', async interaction => {
           url: chainStationLink,
           image: { url: accessorizedImageUrl }
         };
-        await interaction.reply({ embeds: [embed] });
+        await interaction.editReply({ embeds: [embed] });
       } else {
-        await interaction.reply(`Sorry, I couldn't find details for MoonCat with token ID: ${tokenId}`);
+        await interaction.editReply(`Sorry, I couldn't find details for MoonCat with token ID: ${tokenId}`);
       }
-    } catch (error) {
-      console.error('Error fetching accessorized image:', error);
-      await interaction.reply('An error occurred while retrieving the accessorized image.');
     }
-  }
 
-  if (commandName === 'acc') {
-    const accessoryId = options.getInteger('accessoryid');
-
-    try {
+    if (commandName === 'acc') {
+      const accessoryId = options.getInteger('accessoryid');
       const accessoryMetadata = await fetchAccessoryMetadata(accessoryId);
       const accessoryName = accessoryMetadata.name;
 
@@ -158,17 +147,11 @@ client.on('interactionCreate', async interaction => {
         url: chainStationLink,
         image: { url: accessorizedImageUrl }
       };
-      await interaction.reply({ embeds: [embed] });
-    } catch (error) {
-      console.error('Error fetching accessory image:', error);
-      await interaction.reply('An error occurred while retrieving the accessory image.');
+      await interaction.editReply({ embeds: [embed] });
     }
-  }
 
-  if (commandName === 'dna') {
-    const tokenId = options.getInteger('tokenid');
-
-    try {
+    if (commandName === 'dna') {
+      const tokenId = options.getInteger('tokenid');
       const moonCatDetails = await getMoonCatNameOrId(tokenId);
       const dnaImageUrl = await getDNAImageURL(tokenId);
 
@@ -185,31 +168,25 @@ client.on('interactionCreate', async interaction => {
 
         const message = `${title} ${clickableText}`;
 
-        await interaction.reply({ content: message });
+        await interaction.editReply({ content: message });
       } else {
-        await interaction.reply(`Sorry, I couldn't fetch the DNA image for MoonCat with token ID: ${tokenId}`);
+        await interaction.editReply(`Sorry, I couldn't fetch the DNA image for MoonCat with token ID: ${tokenId}`);
       }
-    } catch (error) {
-      console.error('Error fetching DNA image URL:', error);
-      await interaction.reply('An error occurred while retrieving the DNA image.');
     }
-  }
 
-  if (commandName === 'wrp') {
-    const tokenId = options.getInteger('tokenid');
-
-    try {
+    if (commandName === 'wrp') {
+      const tokenId = options.getInteger('tokenid');
       const rescueIndex = await getRescueIndexFromWrapper(tokenId);
 
       if (rescueIndex) {
-        await interaction.reply(`Old-wrapped token ID ${tokenId} is Rescue Order ${rescueIndex}`);
+        await interaction.editReply(`Old-wrapped token ID ${tokenId} is Rescue Order ${rescueIndex}`);
       } else {
-        await interaction.reply('Could not fetch rescue index.');
+        await interaction.editReply('Could not fetch rescue index.');
       }
-    } catch (error) {
-      console.error('Error fetching rescue index from wrapper token:', error);
-      await interaction.reply('An error occurred while retrieving the rescue index.');
     }
+  } catch (error) {
+    console.error('Error handling interaction:', error);
+    await interaction.editReply('An error occurred while processing the command.');
   }
 });
 
