@@ -69,7 +69,7 @@ client.on('interactionCreate', async interaction => {
   const { commandName, options } = interaction;
 
   try {
-    await interaction.deferReply(); // Acknowledge the interaction to avoid timeouts
+    await interaction.deferReply();
 
     if (commandName === 'mc') {
       const tokenId = options.getInteger('tokenid');
@@ -133,21 +133,44 @@ client.on('interactionCreate', async interaction => {
 
     if (commandName === 'acc') {
       const accessoryId = options.getInteger('accessoryid');
-      const accessoryMetadata = await fetchAccessoryMetadata(accessoryId);
-      const accessoryName = accessoryMetadata.name;
+      
+      const accessoryDetails = await fetchAccessoryDetails(accessoryId);
 
-      const randomTokenId = Math.floor(Math.random() * 25440);
-      const accessorizedImageUrl = `https://api.mooncat.community/accessory-image/${accessoryId}.png`;
+      if (!accessoryDetails) {
+        await interaction.editReply(`Could not fetch accessory details for accessory ID: ${accessoryId}`);
+        return;
+      }
 
-      const chainStationLink = `https://chainstation.mooncatrescue.com/accessories/${accessoryId}`;
+      if (!accessoryDetails.ownedBy || accessoryDetails.ownedBy.list.length === 0) {
+        const accessorizedImageUrl = `https://api.mooncat.community/accessory-image/${accessoryId}.png`;
 
-      const embed = {
-        color: 3447003,
-        title: `Accessory #${accessoryId}: ${accessoryName}`,
-        url: chainStationLink,
-        image: { url: accessorizedImageUrl }
-      };
-      await interaction.editReply({ embeds: [embed] });
+        const chainStationLink = `https://chainstation.mooncatrescue.com/accessories/${accessoryId}`;
+
+        const embed = {
+          color: 3447003,
+          title: `Accessory #${accessoryId}: ${accessoryDetails.name}`,
+          url: chainStationLink,
+          image: { url: accessorizedImageUrl }
+        };
+
+        await interaction.editReply({ embeds: [embed] });
+      } else {
+        const randomIndex = Math.floor(Math.random() * accessoryDetails.ownedBy.list.length);
+        const randomMoonCatId = accessoryDetails.ownedBy.list[randomIndex].rescueOrder;
+
+        const accessorizedImageUrl = `https://api.mooncat.community/image/${randomMoonCatId}?costumes=true&acc=${accessoryId}`;
+
+        const chainStationLink = `https://chainstation.mooncatrescue.com/mooncats/${randomMoonCatId}`;
+
+        const embed = {
+          color: 3447003,
+          title: `MoonCat #${randomMoonCatId} with Accessory #${accessoryId}: ${accessoryDetails.name}`,
+          url: chainStationLink,
+          image: { url: accessorizedImageUrl }
+        };
+
+        await interaction.editReply({ embeds: [embed] });
+      }
     }
 
     if (commandName === 'dna') {
@@ -192,16 +215,16 @@ client.on('interactionCreate', async interaction => {
 
 client.login(process.env.DISCORD_TOKEN);
 
-async function fetchAccessoryMetadata(accessoryId) {
+async function fetchAccessoryDetails(accessoryId) {
   try {
     const response = await fetch(`https://api.mooncat.community/accessory/${accessoryId}`);
     if (!response.ok) {
-      throw new Error(`Failed to fetch accessory metadata: ${response.statusText}`);
+      throw new Error(`Failed to fetch accessory details: ${response.statusText}`);
     }
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error fetching accessory metadata:', error);
+    console.error('Error fetching accessory details:', error);
     return null;
   }
 }
@@ -281,4 +304,3 @@ async function getDNAImageURL(tokenId) {
     console.error('Error fetching DNA image URL:', error);
     return null;
   }
-}
