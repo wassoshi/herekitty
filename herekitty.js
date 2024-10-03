@@ -145,10 +145,14 @@ client.on('interactionCreate', async interaction => {
       console.log("OwnedBy List: ", accessoryDetails.ownedBy);
 
       const ownersList = accessoryDetails.ownedBy?.list;
+      console.log("Owners List: ", ownersList);
 
       if (ownersList && ownersList.length > 0) {
         const randomIndex = Math.floor(Math.random() * ownersList.length);
         const randomMoonCatId = ownersList[randomIndex].rescueOrder;
+
+        console.log(`Selected MoonCat ID: ${randomMoonCatId} for Accessory ID: ${accessoryId}`);
+
 
         const accessorizedImageUrl = `https://api.mooncat.community/image/${randomMoonCatId}?costumes=true&acc=${accessoryId}`;
 
