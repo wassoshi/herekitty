@@ -297,7 +297,7 @@ async function checkMoonCatListing(tokenId, delayBetweenCalls = 100) {
     if (lastEvent && lastEvent.event_type === 'order' && lastEvent.order_type === 'listing') {
       const now = Math.floor(Date.now() / 1000);
 
-      if (lastEvent.expiration_date > now) {
+      if (lastEvent.start_date <= now && lastEvent.expiration_date > now) {
         const price = (parseInt(lastEvent.payment.quantity) / Math.pow(10, lastEvent.payment.decimals)).toFixed(2);
         return {
           isActive: true,
