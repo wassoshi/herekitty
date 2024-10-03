@@ -20,11 +20,25 @@ const commands = [
         .setDescription('The MoonCat token ID')
         .setRequired(true)),
   new SlashCommandBuilder()
+    .setName('mcacc')
+    .setDescription('Fetch accessorized image for a specific MoonCat')
+    .addIntegerOption(option => 
+      option.setName('tokenid')
+        .setDescription('The MoonCat token ID')
+        .setRequired(true)),
+  new SlashCommandBuilder()
     .setName('dna')
     .setDescription('Fetch DNA image for a specific token')
     .addIntegerOption(option => 
       option.setName('tokenid')
         .setDescription('The token ID for the DNA image')
+        .setRequired(true)),
+  new SlashCommandBuilder()
+    .setName('acc')
+    .setDescription('Fetch a random MoonCat with a specified accessory')
+    .addIntegerOption(option => 
+      option.setName('accessoryid')
+        .setDescription('The accessory ID')
         .setRequired(true)),
   new SlashCommandBuilder()
     .setName('wrp')
@@ -90,6 +104,67 @@ client.on('interactionCreate', async interaction => {
     }
   }
 
+  if (commandName === 'mcacc') {
+    const tokenId = options.getInteger('tokenid');
+
+    try {
+      const moonCatDetails = await getMoonCatNameOrId(tokenId);
+      const accessorizedImageUrl = `https://api.mooncat.community/accessorized-image/${tokenId}.png`;
+
+      if (moonCatDetails) {
+        const rescueIndex = moonCatDetails.details.rescueIndex;
+        const hexId = moonCatDetails.details.catId;
+
+        let name = moonCatDetails.details.name;
+        if (name) {
+          name = name.replace(" (accessorized)", "");
+        }
+
+        const title = name ? `MoonCat #${rescueIndex}: ${name}` : `MoonCat #${rescueIndex}: ${hexId}`;
+
+        const chainStationLink = `https://chainstation.mooncatrescue.com/mooncats/${tokenId}`;
+
+        const embed = {
+          color: 3447003,
+          title: title,
+          url: chainStationLink,
+          image: { url: accessorizedImageUrl }
+        };
+        await interaction.reply({ embeds: [embed] });
+      } else {
+        await interaction.reply(`Sorry, I couldn't find details for MoonCat with token ID: ${tokenId}`);
+      }
+    } catch (error) {
+      console.error('Error fetching accessorized image:', error);
+      await interaction.reply('An error occurred while retrieving the accessorized image.');
+    }
+  }
+
+  if (commandName === 'acc') {
+    const accessoryId = options.getInteger('accessoryid');
+
+    try {
+      const accessoryMetadata = await fetchAccessoryMetadata(accessoryId);
+      const accessoryName = accessoryMetadata.name;
+
+      const randomTokenId = Math.floor(Math.random() * 25440);
+      const accessorizedImageUrl = `https://api.mooncat.community/accessory-image/${accessoryId}.png`;
+
+      const chainStationLink = `https://chainstation.mooncatrescue.com/accessories/${accessoryId}`;
+
+      const embed = {
+        color: 3447003,
+        title: `Accessory #${accessoryId}: ${accessoryName}`,
+        url: chainStationLink,
+        image: { url: accessorizedImageUrl }
+      };
+      await interaction.reply({ embeds: [embed] });
+    } catch (error) {
+      console.error('Error fetching accessory image:', error);
+      await interaction.reply('An error occurred while retrieving the accessory image.');
+    }
+  }
+
   if (commandName === 'dna') {
     const tokenId = options.getInteger('tokenid');
 
@@ -139,6 +214,20 @@ client.on('interactionCreate', async interaction => {
 });
 
 client.login(process.env.DISCORD_TOKEN);
+
+async function fetchAccessoryMetadata(accessoryId) {
+  try {
+    const response = await fetch(`https://api.mooncat.community/accessory/${accessoryId}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch accessory metadata: ${response.statusText}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching accessory metadata:', error);
+    return null;
+  }
+}
 
 async function getRescueIndexFromWrapper(tokenId) {
   const provider = new AlchemyProvider('homestead', process.env.ALCHEMY_API_KEY);
