@@ -144,11 +144,11 @@ client.on('interactionCreate', async interaction => {
       console.log("Accessory Details: ", accessoryDetails);
       console.log("OwnedBy List: ", accessoryDetails.ownedBy);
 
-      if (accessoryDetails.ownedBy && accessoryDetails.ownedBy.list && accessoryDetails.ownedBy.list.length > 0) {
-        const randomIndex = Math.floor(Math.random() * accessoryDetails.ownedBy.list.length);
-        const randomMoonCatId = accessoryDetails.ownedBy.list[randomIndex].rescueOrder;
+      const ownersList = accessoryDetails.ownedBy?.list;
 
-        console.log("Selected MoonCat Rescue Order: ", randomMoonCatId);
+      if (ownersList && ownersList.length > 0) {
+        const randomIndex = Math.floor(Math.random() * ownersList.length);
+        const randomMoonCatId = ownersList[randomIndex].rescueOrder;
 
         const accessorizedImageUrl = `https://api.mooncat.community/image/${randomMoonCatId}?costumes=true&acc=${accessoryId}`;
 
