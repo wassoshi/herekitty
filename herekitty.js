@@ -104,9 +104,10 @@ client.on('interactionCreate', async interaction => {
           name = name.replace(" (accessorized)", "");
         }
 
-        const title = name ? `MoonCat #${tokenId}: ${name}` : `MoonCat #${tokenId}`;
+        const title = `MoonCat #${tokenId}:`;
+        const clickableText = name ? `[${name}](${dnaImageUrl})` : `[${hexId}](${dnaImageUrl})`;
 
-        const message = `${title} [DNA](${dnaImageUrl})`;
+        const message = `${title} ${clickableText}`;
 
         await interaction.reply({ content: message });
       } else {
