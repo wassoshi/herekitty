@@ -316,14 +316,19 @@ async function checkMoonCatListing(tokenId, delayBetweenCalls = 100) {
     if (lastEvent && lastEvent.event_type === 'order' && lastEvent.order_type === 'listing') {
       const now = Math.floor(Date.now() / 1000);
 
+      console.log(`Token ${tokenId}: start_date = ${lastEvent.start_date}, expiration_date = ${lastEvent.expiration_date}, now = ${now}`);
+
       if (lastEvent.start_date <= now && lastEvent.expiration_date > now) {
         const price = (parseInt(lastEvent.payment.quantity) / Math.pow(10, lastEvent.payment.decimals)).toFixed(2);
+        console.log(`Listing active for token ${tokenId}, price: ${price} ETH`);
         return {
           isActive: true,
           tokenId,
           price,
           url: lastEvent.asset.opensea_url
         };
+      } else {
+        console.log(`Listing not active for token ${tokenId}. now = ${now}, start_date = ${lastEvent.start_date}, expiration_date = ${lastEvent.expiration_date}`);
       }
     }
 
