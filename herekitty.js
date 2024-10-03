@@ -141,9 +141,14 @@ client.on('interactionCreate', async interaction => {
         return;
       }
 
+      console.log("Accessory Details: ", accessoryDetails);
+      console.log("OwnedBy List: ", accessoryDetails.ownedBy);
+
       if (accessoryDetails.ownedBy && accessoryDetails.ownedBy.list && accessoryDetails.ownedBy.list.length > 0) {
         const randomIndex = Math.floor(Math.random() * accessoryDetails.ownedBy.list.length);
         const randomMoonCatId = accessoryDetails.ownedBy.list[randomIndex].rescueOrder;
+
+        console.log("Selected MoonCat Rescue Order: ", randomMoonCatId);
 
         const accessorizedImageUrl = `https://api.mooncat.community/image/${randomMoonCatId}?costumes=true&acc=${accessoryId}`;
 
@@ -158,6 +163,7 @@ client.on('interactionCreate', async interaction => {
 
         await interaction.editReply({ embeds: [embed] });
       } else {
+        console.log("Fallback: No MoonCats own this accessory");
         const accessorizedImageUrl = `https://api.mooncat.community/accessory-image/${accessoryId}.png`;
         const chainStationLink = `https://chainstation.mooncatrescue.com/accessories/${accessoryId}`;
 
