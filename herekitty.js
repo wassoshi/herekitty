@@ -141,8 +141,11 @@ client.on('interactionCreate', async interaction => {
         return;
       }
 
-      if (!accessoryDetails.ownedBy || accessoryDetails.ownedBy.list.length === 0) {
-        const accessorizedImageUrl = `https://api.mooncat.community/accessory-image/${accessoryId}.png`;
+      if (accessoryDetails.ownedBy && accessoryDetails.ownedBy.list && accessoryDetails.ownedBy.list.length > 0) {
+        const randomIndex = Math.floor(Math.random() * accessoryDetails.ownedBy.list.length);
+        const randomMoonCatId = accessoryDetails.ownedBy.list[randomIndex].rescueOrder;
+
+        const accessorizedImageUrl = `https://api.mooncat.community/image/${randomMoonCatId}?costumes=true&acc=${accessoryId}`;
 
         const chainStationLink = `https://chainstation.mooncatrescue.com/accessories/${accessoryId}`;
 
@@ -155,16 +158,12 @@ client.on('interactionCreate', async interaction => {
 
         await interaction.editReply({ embeds: [embed] });
       } else {
-        const randomIndex = Math.floor(Math.random() * accessoryDetails.ownedBy.list.length);
-        const randomMoonCatId = accessoryDetails.ownedBy.list[randomIndex].rescueOrder;
-
-        const accessorizedImageUrl = `https://api.mooncat.community/image/${randomMoonCatId}?costumes=true&acc=${accessoryId}`;
-
-        const chainStationLink = `https://chainstation.mooncatrescue.com/mooncats/${randomMoonCatId}`;
+        const accessorizedImageUrl = `https://api.mooncat.community/accessory-image/${accessoryId}.png`;
+        const chainStationLink = `https://chainstation.mooncatrescue.com/accessories/${accessoryId}`;
 
         const embed = {
           color: 3447003,
-          title: `MoonCat #${randomMoonCatId} with Accessory #${accessoryId}: ${accessoryDetails.name}`,
+          title: `Accessory #${accessoryId}: ${accessoryDetails.name}`,
           url: chainStationLink,
           image: { url: accessorizedImageUrl }
         };
