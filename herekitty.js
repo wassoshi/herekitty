@@ -99,6 +99,7 @@ client.on('interactionCreate', async interaction => {
 
       if (dnaImageUrl) {
         let name = moonCatDetails?.details?.name || null;
+        const hexId = moonCatDetails?.details?.catId || tokenId;
 
         if (name) {
           name = name.replace(" (accessorized)", "");
