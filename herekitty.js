@@ -182,6 +182,20 @@ client.on('interactionCreate', async interaction => {
       }
     }
 
+    async function fetchAccessoryDetails(accessoryId) {
+      try {
+        const response = await fetch(`https://api.mooncatrescue.com/accessory/traits/${accessoryId}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch accessory details: ${response.statusText}`);
+        }
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error('Error fetching accessory details:', error);
+        return null;
+      }
+    }
+
     if (commandName === 'dna') {
       const tokenId = options.getInteger('tokenid');
       const moonCatDetails = await getMoonCatNameOrId(tokenId);
