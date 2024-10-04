@@ -199,7 +199,7 @@ client.on('interactionCreate', async interaction => {
         await interaction.editReply(`Could not fetch accessory details for accessory ID: ${accessoryId}`);
         return;
       }
-      
+
       console.log(`Accessory Details for ID ${accessoryId}:`, accessoryDetails);
       const moonCatOwners = accessoryDetails.ownedBy?.list;
       console.log(`MoonCat owners with this accessory (${accessoryId}):`, moonCatOwners);
@@ -208,13 +208,21 @@ client.on('interactionCreate', async interaction => {
         await interaction.editReply(`No MoonCats found with accessory ID: ${accessoryId}`);
         return;
       }
-      
+
       moonCatOwners.forEach(owner => {
         console.log(`MoonCat with rescue order ${owner.rescueOrder} owns accessory ID: ${accessoryId}`);
       });
 
       console.log(`Checking OpenSea listings for MoonCats with accessory ID: ${accessoryId}`);
-      const listings = await Promise.all(moonCatOwners.map(owner => checkMoonCatListing(owner.rescueOrder)));
+  
+      const delayBetweenCalls = 200; // 200ms delay between requests
+      const listings = [];
+
+      for (let i = 0; i < moonCatOwners.length; i++) {
+        const owner = moonCatOwners[i];
+        const listing = await checkMoonCatListing(owner.rescueOrder, delayBetweenCalls);
+        listings.push(listing);
+      }
 
       listings.forEach(listing => {
         console.log(`Listing for MoonCat #${listing.tokenId}:`, listing);
@@ -307,69 +315,78 @@ function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function checkMoonCatListing(tokenId, delayBetweenCalls = 200) {
+async function fetchOpenSeaEvents(tokenId, eventType, delayBetweenCalls = 200) {
   await delay(delayBetweenCalls);
-  
+
   try {
-    const response = await fetch(`https://api.opensea.io/api/v2/events/chain/ethereum/contract/0xc3f733ca98E0daD0386979Eb96fb1722A1A05E69/nfts/${tokenId}?event_type=listing,sale,transfer`, {
+    const url = `https://api.opensea.io/api/v2/events/chain/ethereum/contract/0xc3f733ca98E0daD0386979Eb96fb1722A1A05E69/nfts/${tokenId}?event_type=${eventType}`;
+    const options = {
       headers: {
         'accept': 'application/json',
         'x-api-key': process.env.OPENSEA_API_KEY
       }
-    });
+    };
+
+    const response = await fetch(url, options);
 
     if (!response.ok) {
-    const errorText = await response.text();
-      throw new Error(`Failed to fetch OpenSea listings for tokenId ${tokenId}`);
+      const errorText = await response.text();
+      throw new Error(`Failed to fetch OpenSea ${eventType} events for tokenId ${tokenId}: ${errorText}`);
     }
 
     const data = await response.json();
-    const events = data.asset_events;
-
-    if (events.length === 0) {
-      console.log(`No events found for token ${tokenId}`);
-      return { isActive: false, tokenId };
-    }
-    
-    const now = Math.floor(Date.now() / 1000);
-    let isActive = false;
-    let price = null;
-    let listingUrl = null;
-
-    const latestListing = events.find(event => event.event_type === 'order' && event.order_type === 'listing');
-    if (latestListing) {
-      const { start_date, expiration_date, asset, payment } = latestListing;
-
-      console.log(`Token ${tokenId}: start_date = ${start_date}, expiration_date = ${expiration_date}, now = ${now}`);
-      
-      if (start_date <= now && expiration_date > now) {
-        isActive = true;
-        price = (parseInt(payment.quantity) / Math.pow(10, payment.decimals)).toFixed(2);
-        listingUrl = asset.opensea_url;
-      }
-    }
-
-    const latestSaleOrTransfer = events.find(event => 
-      (event.event_type === 'sale' || event.event_type === 'transfer') && 
-      event.event_timestamp > latestListing?.start_date
-    );
-
-    if (latestSaleOrTransfer) {
-      console.log(`Sale or transfer detected for token ${tokenId}, deactivating listing.`);
-      isActive = false;
-    }
-
-    if (isActive) {
-      return { isActive, tokenId, price, url: listingUrl };
-    } else {
-      console.log(`Listing not active for token ${tokenId}.`);
-      return { isActive: false, tokenId };
-    }
+    return data.asset_events || [];
   } catch (error) {
-    console.error(`Error fetching listing for tokenId ${tokenId}:`, error);
+    console.error(`Error fetching ${eventType} events for tokenId ${tokenId}:`, error);
+    return [];
+  }
+}
+
+async function checkMoonCatListing(tokenId, delayBetweenCalls = 200) {
+  const listingEvents = await fetchOpenSeaEvents(tokenId, 'listing', delayBetweenCalls);
+
+  if (listingEvents.length === 0) {
+    console.log(`No listing events found for token ${tokenId}`);
+    return { isActive: false, tokenId };
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  let isActive = false;
+  let price = null;
+  let listingUrl = null;
+
+  const latestListing = listingEvents.find(event => event.event_type === 'order' && event.order_type === 'listing');
+  if (latestListing) {
+    const { start_date, expiration_date, asset, payment } = latestListing;
+
+    console.log(`Token ${tokenId}: start_date = ${start_date}, expiration_date = ${expiration_date}, now = ${now}`);
+
+    if (start_date <= now && expiration_date > now) {
+      isActive = true;
+      price = (parseInt(payment.quantity) / Math.pow(10, payment.decimals)).toFixed(2);
+      listingUrl = asset.opensea_url;
+    }
+  }
+
+  const saleEvents = await fetchOpenSeaEvents(tokenId, 'sale', delayBetweenCalls);
+  const latestSale = saleEvents.find(event => event.event_timestamp > latestListing?.start_date);
+
+  const transferEvents = await fetchOpenSeaEvents(tokenId, 'transfer', delayBetweenCalls);
+  const latestTransfer = transferEvents.find(event => event.event_timestamp > latestListing?.start_date);
+
+  if (latestSale || latestTransfer) {
+    console.log(`Sale or transfer detected for token ${tokenId}, deactivating listing.`);
+    isActive = false;
+  }
+
+  if (isActive) {
+    return { isActive, tokenId, price, url: listingUrl };
+  } else {
+    console.log(`Listing not active for token ${tokenId}.`);
     return { isActive: false, tokenId };
   }
 }
+
 
 async function getRescueIndexFromWrapper(tokenId) {
   const provider = new AlchemyProvider('homestead', process.env.ALCHEMY_API_KEY);
