@@ -195,7 +195,7 @@ client.on('interactionCreate', async interaction => {
       const accessoryDetails = await fetchAccessoryDetails(accessoryId);
 
       if (!accessoryDetails) {
-      console.log(`Could not fetch accessory details for accessory ID: ${accessoryId}`);
+        console.log(`Could not fetch accessory details for accessory ID: ${accessoryId}`);
         await interaction.editReply(`Could not fetch accessory details for accessory ID: ${accessoryId}`);
         return;
       }
@@ -223,17 +223,29 @@ client.on('interactionCreate', async interaction => {
       const activeListings = listings.filter(listing => listing.isActive);
 
       if (activeListings.length > 0) {
-        const listingMessages = activeListings.map(listing => `MoonCat #${listing.tokenId} is listed for ${listing.price} ETH: ${listing.url}`);
+        const listingMessages = activeListings.map(listing => {
+          const moonCatImageUrl = `https://api.mooncat.community/image/${listing.tokenId}?costumes=true&acc=${accessoryId}`;
+          return {
+            embed: {
+              color: 3447003,
+              title: `MoonCat #${listing.tokenId} is listed for ${listing.price} ETH`,
+              url: listing.url,
+              image: { url: moonCatImageUrl },
+            }
+          };
+        });
 
         console.log(`Active listings found:`, listingMessages);
 
-        await interaction.editReply(listingMessages.join('\n'));
+        await interaction.editReply({
+          content: `Active listings for accessory ID ${accessoryId}:`,
+          embeds: listingMessages.map(message => message.embed)
+        });
       } else {
         console.log(`No active listings found for MoonCats with accessory ID: ${accessoryId}`);
-        await interaction.editReply(`None of the MoonCats with this accessory are currently listed for sale.`);
+        await interaction.editReply(`None of the MoonCats with accessory ID ${accessoryId} are currently listed for sale.`);
       }
     }
-
 
     if (commandName === 'dna') {
       const tokenId = options.getInteger('tokenid');
@@ -299,7 +311,7 @@ async function checkMoonCatListing(tokenId, delayBetweenCalls = 100) {
   await delay(delayBetweenCalls);
   
   try {
-    const response = await fetch(`https://api.opensea.io/api/v2/events/chain/ethereum/contract/0xc3f733ca98E0daD0386979Eb96fb1722A1A05E69/nfts/${tokenId}?event_type=listing`, {
+    const response = await fetch(`https://api.opensea.io/api/v2/events/chain/ethereum/contract/0xc3f733ca98E0daD0386979Eb96fb1722A1A05E69/nfts/${tokenId}?event_type=listing,sale,transfer`, {
       headers: {
         'accept': 'application/json',
         'x-api-key': process.env.OPENSEA_API_KEY
@@ -317,28 +329,41 @@ async function checkMoonCatListing(tokenId, delayBetweenCalls = 100) {
       console.log(`No events found for token ${tokenId}`);
       return { isActive: false, tokenId };
     }
+    
+    const now = Math.floor(Date.now() / 1000);
+    let isActive = false;
+    let price = null;
+    let listingUrl = null;
 
-    const latestEvent = events[0];
-    if (latestEvent.event_type === 'order' && latestEvent.order_type === 'listing') {
-      const now = Math.floor(Date.now() / 1000)
+    const latestListing = events.find(event => event.event_type === 'order' && event.order_type === 'listing');
+    if (latestListing) {
+      const { start_date, expiration_date, asset, payment } = latestListing;
 
-      console.log(`Token ${tokenId}: start_date = ${latestEvent.start_date}, expiration_date = ${latestEvent.expiration_date}, now = ${now}`);
-
-      if (latestEvent.start_date <= now && latestEvent.expiration_date > now) {
-        const price = (parseInt(latestEvent.payment.quantity) / Math.pow(10, latestEvent.payment.decimals)).toFixed(2);
-        return {
-          isActive: true,
-          tokenId,
-          price,
-          url: latestEvent.asset.opensea_url
-        };
-      } else {
-        console.log(`Listing not active for token ${tokenId}. now = ${now}, start_date = ${latestEvent.start_date}, expiration_date = ${latestEvent.expiration_date}`);
-        return { isActive: false, tokenId };
+      console.log(`Token ${tokenId}: start_date = ${start_date}, expiration_date = ${expiration_date}, now = ${now}`);
+      
+      if (start_date <= now && expiration_date > now) {
+        isActive = true;
+        price = (parseInt(payment.quantity) / Math.pow(10, payment.decimals)).toFixed(2);
+        listingUrl = asset.opensea_url;
       }
     }
 
-    return { isActive: false, tokenId };
+    const latestSaleOrTransfer = events.find(event => 
+      (event.event_type === 'sale' || event.event_type === 'transfer') && 
+      event.event_timestamp > latestListing?.start_date
+    );
+
+    if (latestSaleOrTransfer) {
+      console.log(`Sale or transfer detected for token ${tokenId}, deactivating listing.`);
+      isActive = false;
+    }
+
+    if (isActive) {
+      return { isActive, tokenId, price, url: listingUrl };
+    } else {
+      console.log(`Listing not active for token ${tokenId}.`);
+      return { isActive: false, tokenId };
+    }
   } catch (error) {
     console.error(`Error fetching listing for tokenId ${tokenId}:`, error);
     return { isActive: false, tokenId };
