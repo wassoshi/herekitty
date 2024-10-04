@@ -307,7 +307,7 @@ function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function checkMoonCatListing(tokenId, delayBetweenCalls = 100) {
+async function checkMoonCatListing(tokenId, delayBetweenCalls = 200) {
   await delay(delayBetweenCalls);
   
   try {
@@ -319,6 +319,7 @@ async function checkMoonCatListing(tokenId, delayBetweenCalls = 100) {
     });
 
     if (!response.ok) {
+    const errorText = await response.text();
       throw new Error(`Failed to fetch OpenSea listings for tokenId ${tokenId}`);
     }
 
