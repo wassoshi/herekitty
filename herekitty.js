@@ -215,7 +215,7 @@ client.on('interactionCreate', async interaction => {
 
       console.log(`Checking OpenSea listings for MoonCats with accessory ID: ${accessoryId}`);
   
-      const delayBetweenCalls = 200; // 200ms delay between requests
+      const delayBetweenCalls = 350;
       const listings = [];
 
       for (let i = 0; i < moonCatOwners.length; i++) {
@@ -315,7 +315,7 @@ function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function fetchOpenSeaEvents(tokenId, eventType, delayBetweenCalls = 200) {
+async function fetchOpenSeaEvents(tokenId, eventType, delayBetweenCalls = 350) {
   await delay(delayBetweenCalls);
 
   try {
@@ -342,7 +342,7 @@ async function fetchOpenSeaEvents(tokenId, eventType, delayBetweenCalls = 200) {
   }
 }
 
-async function checkMoonCatListing(tokenId, delayBetweenCalls = 200) {
+async function checkMoonCatListing(tokenId, delayBetweenCalls = 350) {
   const listingEvents = await fetchOpenSeaEvents(tokenId, 'listing', delayBetweenCalls);
 
   if (listingEvents.length === 0) {
