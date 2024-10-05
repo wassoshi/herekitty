@@ -147,19 +147,14 @@ client.on('interactionCreate', async interaction => {
         await interaction.editReply(`Could not fetch accessory details for accessory ID: ${accessoryId}`);
         return;
       }
-
       console.log("Accessory Details: ", accessoryDetails);
       console.log("OwnedBy List: ", accessoryDetails.ownedBy);
-
       const ownersList = accessoryDetails.ownedBy?.list;
       console.log("Owners List: ", ownersList);
-
       if (ownersList && ownersList.length > 0) {
         const randomIndex = Math.floor(Math.random() * ownersList.length);
         const randomMoonCatId = ownersList[randomIndex].rescueOrder;
-
         console.log(`Selected MoonCat ID: ${randomMoonCatId} for Accessory ID: ${accessoryId}`);
-
 
         const accessorizedImageUrl = `https://api.mooncat.community/image/${randomMoonCatId}?costumes=true&acc=${accessoryId}`;
 
@@ -199,7 +194,6 @@ client.on('interactionCreate', async interaction => {
         await interaction.editReply(`Could not fetch accessory details for accessory ID: ${accessoryId}`);
         return;
       }
-
       console.log(`Accessory Details for ID ${accessoryId}:`, accessoryDetails);
       const moonCatOwners = accessoryDetails.ownedBy?.list;
       console.log(`MoonCat owners with this accessory (${accessoryId}):`, moonCatOwners);
@@ -208,13 +202,11 @@ client.on('interactionCreate', async interaction => {
         await interaction.editReply(`No MoonCats found with accessory ID: ${accessoryId}`);
         return;
       }
-
       moonCatOwners.forEach(owner => {
         console.log(`MoonCat with rescue order ${owner.rescueOrder} owns accessory ID: ${accessoryId}`);
       });
 
-      console.log(`Checking OpenSea listings for MoonCats with accessory ID: ${accessoryId}`);
-  
+      console.log(`Checking OpenSea listings for MoonCats with accessory ID: ${accessoryId}`);      
       const delayBetweenCalls = 350;
       const listings = [];
 
@@ -223,11 +215,9 @@ client.on('interactionCreate', async interaction => {
         const listing = await checkMoonCatListing(owner.rescueOrder, delayBetweenCalls);
         listings.push(listing);
       }
-
       listings.forEach(listing => {
         console.log(`Listing for MoonCat #${listing.tokenId}:`, listing);
       });
-
       const activeListings = listings.filter(listing => listing.isActive);
 
       if (activeListings.length > 0) {
@@ -242,7 +232,6 @@ client.on('interactionCreate', async interaction => {
             }
           };
         });
-
         console.log(`Active listings found:`, listingMessages);
 
         await interaction.editReply({
@@ -302,20 +291,25 @@ client.on('interactionCreate', async interaction => {
             color: 3447003,
             title: title,
             url: chainStationLink,
-           image: { url: imageUrl }
-         };
+            image: { url: imageUrl }
+          };
 
-         await interaction.editReply({ 
-         content: `Old-wrapped token ID ${tokenId} is Rescue Index ${rescueIndex}`,
-         embeds: [embed] 
-       });
-     } else {
-       await interaction.editReply(`Old-wrapped token ID ${tokenId} is Rescue Index ${rescueIndex}`);
-     }
-   } else {
-     await interaction.editReply('Could not fetch rescue index.');
-   }
-}
+          await interaction.editReply({
+            content: `old-wrapped token ID ${tokenId} is rescue index ${rescueIndex}`,
+            embeds: [embed]
+          });
+        } else {
+          await interaction.editReply(`old-wrapped token ID ${tokenId} is rescue index ${rescueIndex}, but could not fetch additional details.`);
+        }
+      } else {
+        await interaction.editReply('Could not fetch rescue index.');
+      }
+    }
+  } catch (error) {
+    console.error('Error handling interaction:', error);
+    await interaction.editReply('An error occurred while processing the command.');
+  }
+});
 
 client.login(process.env.DISCORD_TOKEN);
 
@@ -380,7 +374,6 @@ async function checkMoonCatListing(tokenId, delayBetweenCalls = 350) {
   const latestListing = listingEvents.find(event => event.event_type === 'order' && event.order_type === 'listing');
   if (latestListing) {
     const { start_date, expiration_date, asset, payment } = latestListing;
-
     console.log(`Token ${tokenId}: start_date = ${start_date}, expiration_date = ${expiration_date}, now = ${now}`);
 
     if (start_date <= now && expiration_date > now) {
@@ -408,7 +401,6 @@ async function checkMoonCatListing(tokenId, delayBetweenCalls = 350) {
     return { isActive: false, tokenId };
   }
 }
-
 
 async function getRescueIndexFromWrapper(tokenId) {
   const provider = new AlchemyProvider('homestead', process.env.ALCHEMY_API_KEY);
