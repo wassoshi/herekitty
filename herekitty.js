@@ -279,21 +279,44 @@ client.on('interactionCreate', async interaction => {
       }
     }
 
-    if (commandName === 'wrp') {
-      const tokenId = options.getInteger('tokenid');
-      const rescueIndex = await getRescueIndexFromWrapper(tokenId);
+if (commandName === 'wrp') {
+  const tokenId = options.getInteger('tokenid');
+  const rescueIndex = await getRescueIndexFromWrapper(tokenId);
 
-      if (rescueIndex) {
-        await interaction.editReply(`Old-wrapped token ID ${tokenId} is Rescue Order ${rescueIndex}`);
-      } else {
-        await interaction.editReply('Could not fetch rescue index.');
+  if (rescueIndex) {
+    const moonCatDetails = await getMoonCatNameOrId(rescueIndex);
+    const imageUrl = await getMoonCatImageURL(rescueIndex);
+
+    if (moonCatDetails && imageUrl) {
+      const hexId = moonCatDetails.details.catId;
+
+      let name = moonCatDetails.details.name;
+      if (name) {
+        name = name.replace(" (accessorized)", "");
       }
+
+      const title = name ? `MoonCat #${rescueIndex}: ${name}` : `MoonCat #${rescueIndex}: ${hexId}`;
+      const chainStationLink = `https://chainstation.mooncatrescue.com/mooncats/${rescueIndex}`;
+
+      const embed = {
+        color: 3447003,
+        title: title,
+        url: chainStationLink,
+        image: { url: imageUrl }
+      };
+
+      await interaction.editReply({ 
+        content: `Old-wrapped token ID ${tokenId} is Rescue Index ${rescueIndex}`,
+        embeds: [embed] 
+      });
+    } else {
+      await interaction.editReply(`Old-wrapped token ID ${tokenId} is Rescue Index ${rescueIndex}`);
     }
-  } catch (error) {
-    console.error('Error handling interaction:', error);
-    await interaction.editReply('An error occurred while processing the command.');
+  } else {
+    await interaction.editReply('Could not fetch rescue index.');
   }
-});
+}
+
 
 client.login(process.env.DISCORD_TOKEN);
 
