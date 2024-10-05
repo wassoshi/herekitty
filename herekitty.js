@@ -316,6 +316,7 @@ client.on('interactionCreate', async interaction => {
         await interaction.editReply('Could not fetch rescue index.');
       }
     }
+});
 
 client.login(process.env.DISCORD_TOKEN);
 
