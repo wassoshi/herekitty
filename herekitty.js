@@ -295,11 +295,11 @@ client.on('interactionCreate', async interaction => {
           };
 
           await interaction.editReply({
-            content: `old-wrapped token ID ${tokenId} is rescue index ${rescueIndex}`,
+            content: `wrapped token ID ${tokenId} is Rescue Index #${rescueIndex}`,
             embeds: [embed]
           });
         } else {
-          await interaction.editReply(`old-wrapped token ID ${tokenId} is rescue index ${rescueIndex}, but could not fetch additional details.`);
+          await interaction.editReply(`wrapped token ID ${tokenId} is Rescue Index #${rescueIndex}, but could not fetch additional details.`);
         }
       } else {
         await interaction.editReply('Could not fetch rescue index.');
