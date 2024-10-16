@@ -166,25 +166,36 @@ client.on('interactionCreate', async interaction => {
     }
 
     if (commandName === 'dna') {
-      const moonCatDetails = await getMoonCatNameOrId(tokenId);
-      const dnaImageUrl = await getDNAImageURL(tokenId);
+      let tokenId = options.getString('identifier');
+      if (!tokenId) {
+        await interaction.editReply(`Invalid identifier.`);
+        return;
+      }
+
+      let rescueIndex = tokenId;
+
+      if (tokenId.startsWith('0x')) {
+        const moonCatDetails = await getMoonCatNameOrId(tokenId);
+        if (moonCatDetails) {
+          rescueIndex = moonCatDetails.details.rescueIndex; // Use rescue index derived from hex
+        } else {
+          await interaction.editReply(`Sorry, couldn't find details for MoonCat with hex ID: ${tokenId}`);
+          return;
+        }
+      }
+
+      const dnaImageUrl = await getDNAImageURL(rescueIndex);
 
       if (dnaImageUrl) {
         let name = moonCatDetails?.details?.name || null;
-        const rescueIndex = moonCatDetails?.details?.rescueIndex || tokenId;
-
-        if (name) {
-          name = name.replace(" (accessorized)", "");
-        }
-
-        const title = `MoonCat #${tokenId}:`;
-        const clickableText = name ? `[${name}](${dnaImageUrl})` : `[${hexId}](${dnaImageUrl})`;
+        const title = `MoonCat #${rescueIndex}:`;
+        const clickableText = name ? `[${name}](${dnaImageUrl})` : `[MoonCat #${rescueIndex}](${dnaImageUrl})`;
 
         const message = `${title} ${clickableText}`;
 
         await interaction.editReply({ content: message });
       } else {
-        await interaction.editReply(`Sorry, I couldn't fetch the DNA image for MoonCat with token ID: ${tokenId}`);
+        await interaction.editReply(`Sorry, I couldn't fetch the DNA image for MoonCat with rescue index: ${rescueIndex}`);
       }
     }
 
