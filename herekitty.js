@@ -189,10 +189,9 @@ client.on('interactionCreate', async interaction => {
 
       if (dnaImageUrl) {
         let name = moonCatDetails?.details?.name || null;
-        const title = name ? `MoonCat #${rescueIndex}: ${name}` : `MoonCat #${rescueIndex}`;
-        const clickableText = `[MoonCat #${rescueIndex}](${dnaImageUrl})`;
+        const clickableText = name ? `[${name}](${dnaImageUrl})` : `[${hexId}](${dnaImageUrl})`;
+        const message = `MoonCat #${rescueIndex}: ${clickableText}`;
 
-        const message = `${title} ${clickableText}`;
 
         await interaction.editReply({ content: message });
       } else {
