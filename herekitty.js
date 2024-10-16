@@ -189,14 +189,19 @@ client.on('interactionCreate', async interaction => {
 
       if (dnaImageUrl) {
         let name = moonCatDetails?.details?.name || null;
+        const rescueIndex = moonCatDetails?.details?.rescueIndex || tokenId;
+        const hexId = moonCatDetails?.details?.catId || tokenId;
+
+        if (name) {
+            name = name.replace(" (accessorized)", "");
+        }
+
         const clickableText = name ? `[${name}](${dnaImageUrl})` : `[${hexId}](${dnaImageUrl})`;
         const message = `MoonCat #${rescueIndex}: ${clickableText}`;
 
-
         await interaction.editReply({ content: message });
-      } else {
-        await interaction.editReply(`Sorry, I couldn't fetch the DNA image for MoonCat with rescue index: ${rescueIndex}`);
-      }
+    } else {
+        await interaction.editReply(`Sorry, I couldn't fetch the DNA image for MoonCat with token ID: ${tokenId}`);
     }
 
     if (commandName === 'acc') {
