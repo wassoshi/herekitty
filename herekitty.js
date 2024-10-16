@@ -93,22 +93,30 @@ client.on('interactionCreate', async interaction => {
   const { commandName, options } = interaction;
 
   try {
-    await interaction.deferReply();
+    try {
+      await interaction.deferReply({ ephemeral: true });
+    } catch (error) {
+      if (error.code === 10062) {
+        console.error('Interaction expired before it could be deferred:', error);
+        return;
+      }
+      throw error;
+    }
 
     const identifier = options.getString('identifier');
     let tokenId;
 
-    // Convert hexID to rescue index if necessary
+
     if (identifier.startsWith('0x')) {
-      const moonCatDetails = await getMoonCatNameOrId(identifier);  // Fetch details using hexID
+      const moonCatDetails = await getMoonCatNameOrId(identifier);
       if (moonCatDetails) {
-        tokenId = moonCatDetails.details.rescueIndex;  // Extract the rescue index
+        tokenId = moonCatDetails.details.rescueIndex;
       } else {
         await interaction.editReply(`Sorry, I couldn't find details for MoonCat with hex ID: ${identifier}`);
         return;
       }
     } else if (!isNaN(parseInt(identifier))) {
-      tokenId = parseInt(identifier);  // Directly use rescue index
+      tokenId = parseInt(identifier);
     } else {
       await interaction.editReply(`Invalid identifier: ${identifier}`);
       return;
@@ -137,7 +145,16 @@ client.on('interactionCreate', async interaction => {
           url: chainStationLink,
           image: { url: imageUrl }
         };
-        await interaction.editReply({ embeds: [embed] });
+
+        try {
+          await interaction.editReply({ embeds: [embed] });
+        } catch (error) {
+          if (error.code === 'InteractionNotReplied') {
+            console.error('Interaction was not replied in time:', error);
+          } else {
+            throw error;
+          }
+        }
       } else {
         await interaction.editReply(`Sorry, I couldn't find details for MoonCat with token ID: ${tokenId}`);
       }
@@ -165,7 +182,16 @@ client.on('interactionCreate', async interaction => {
           url: chainStationLink,
           image: { url: accessorizedImageUrl }
         };
-        await interaction.editReply({ embeds: [embed] });
+
+        try {
+          await interaction.editReply({ embeds: [embed] });
+        } catch (error) {
+          if (error.code === 'InteractionNotReplied') {
+            console.error('Interaction was not replied in time:', error);
+          } else {
+            throw error;
+          }
+        }
       } else {
         await interaction.editReply(`Sorry, I couldn't find details for MoonCat with token ID: ${tokenId}`);
       }
@@ -176,15 +202,15 @@ client.on('interactionCreate', async interaction => {
       let moonCatDetails = null;
 
       if (identifier.startsWith('0x')) {
-        moonCatDetails = await getMoonCatNameOrId(identifier);  // Fetch details using hexID
+        moonCatDetails = await getMoonCatNameOrId(identifier);
         if (moonCatDetails) {
-          rescueIndex = moonCatDetails.details.rescueIndex;  // Extract the rescue index
+          rescueIndex = moonCatDetails.details.rescueIndex;
         } else {
           await interaction.editReply(`Sorry, couldn't find details for MoonCat with hex ID: ${identifier}`);
           return;
         }
       } else if (!isNaN(identifier)) {
-        rescueIndex = identifier;  // Directly use rescue index
+        rescueIndex = identifier;
         moonCatDetails = await getMoonCatNameOrId(rescueIndex);
       } else {
         await interaction.editReply(`Invalid identifier format.`);
@@ -204,7 +230,15 @@ client.on('interactionCreate', async interaction => {
         const clickableText = name ? `[${name}](${dnaImageUrl})` : `[${hexId}](${dnaImageUrl})`;
         const message = `MoonCat #${rescueIndex}: ${clickableText}`;
 
-        await interaction.editReply({ content: message });
+        try {
+          await interaction.editReply({ content: message });
+        } catch (error) {
+          if (error.code === 'InteractionNotReplied') {
+            console.error('Interaction was not replied in time:', error);
+          } else {
+            throw error;
+          }
+        }
       } else {
         await interaction.editReply(`Sorry, I couldn't fetch the DNA image for MoonCat with token ID: ${identifier}`);
       }
@@ -235,7 +269,15 @@ client.on('interactionCreate', async interaction => {
           image: { url: accessorizedImageUrl }
         };
 
-        await interaction.editReply({ embeds: [embed] });
+        try {
+          await interaction.editReply({ embeds: [embed] });
+        } catch (error) {
+          if (error.code === 'InteractionNotReplied') {
+            console.error('Interaction was not replied in time:', error);
+          } else {
+            throw error;
+          }
+        }
       } else {
         const accessorizedImageUrl = `https://api.mooncat.community/accessory-image/${accessoryId}.png`;
         const chainStationLink = `https://chainstation.mooncatrescue.com/accessories/${accessoryId}`;
@@ -247,7 +289,15 @@ client.on('interactionCreate', async interaction => {
           image: { url: accessorizedImageUrl }
         };
 
-        await interaction.editReply({ embeds: [embed] });
+        try {
+          await interaction.editReply({ embeds: [embed] });
+        } catch (error) {
+          if (error.code === 'InteractionNotReplied') {
+            console.error('Interaction was not replied in time:', error);
+          } else {
+            throw error;
+          }
+        }
       }
     }
 
@@ -290,10 +340,18 @@ client.on('interactionCreate', async interaction => {
           };
         });
 
-        await interaction.editReply({
-          content: `Active listings for accessory ID ${accessoryId}:`,
-          embeds: listingMessages.map(message => message.embed)
-        });
+        try {
+          await interaction.editReply({
+            content: `Active listings for accessory ID ${accessoryId}:`,
+            embeds: listingMessages.map(message => message.embed)
+          });
+        } catch (error) {
+          if (error.code === 'InteractionNotReplied') {
+            console.error('Interaction was not replied in time:', error);
+          } else {
+            throw error;
+          }
+        }
       } else {
         await interaction.editReply(`None of the MoonCats with accessory ID ${accessoryId} are currently listed for sale.`);
       }
@@ -325,10 +383,18 @@ client.on('interactionCreate', async interaction => {
             image: { url: imageUrl }
           };
 
-          await interaction.editReply({
-            content: `wrapped token ID ${tokenId} is Rescue Index #${rescueIndex}`,
-            embeds: [embed]
-          });
+          try {
+            await interaction.editReply({
+              content: `wrapped token ID ${tokenId} is Rescue Index #${rescueIndex}`,
+              embeds: [embed]
+            });
+          } catch (error) {
+            if (error.code === 'InteractionNotReplied') {
+              console.error('Interaction was not replied in time:', error);
+            } else {
+              throw error;
+            }
+          }
         } else {
           await interaction.editReply(`wrapped token ID ${tokenId} is Rescue Index #${rescueIndex}, but could not fetch additional details.`);
         }
