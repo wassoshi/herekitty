@@ -172,7 +172,7 @@ client.on('interactionCreate', async interaction => {
         return;
       }
 
-      let rescueIndex = tokenId;
+      let rescueIndex = null;
       let moonCatDetails = null;
 
       if (tokenId.startsWith('0x')) {
@@ -183,6 +183,12 @@ client.on('interactionCreate', async interaction => {
           await interaction.editReply(`Sorry, couldn't find details for MoonCat with hex ID: ${tokenId}`);
           return;
         }
+      } else if (!isNaN(tokenId)) {
+        rescueIndex = tokenId;
+        moonCatDetails = await getMoonCatNameOrId(rescueIndex);
+      } else {
+        await interaction.editReply(`Invalid identifier format.`);
+        return;
       }
 
       const dnaImageUrl = await getDNAImageURL(rescueIndex);
