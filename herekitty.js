@@ -15,23 +15,23 @@ const commands = [
   new SlashCommandBuilder()
     .setName('mc')
     .setDescription('Fetch details for a specific MoonCat')
-    .addIntegerOption(option => 
-      option.setName('tokenid')
-        .setDescription('The MoonCat token ID')
+    .addStringOption(option => 
+      option.setName('identifier')
+        .setDescription('The MoonCat rescue index or hex ID')
         .setRequired(true)),
   new SlashCommandBuilder()
     .setName('mcacc')
     .setDescription('Fetch accessorized image for a specific MoonCat')
-    .addIntegerOption(option => 
-      option.setName('tokenid')
-        .setDescription('The MoonCat token ID')
+    .addStringOption(option => 
+      option.setName('identifier')
+        .setDescription('The MoonCat rescue index or hex ID')
         .setRequired(true)),
   new SlashCommandBuilder()
     .setName('dna')
     .setDescription('Fetch DNA image for a specific token')
-    .addIntegerOption(option => 
-      option.setName('tokenid')
-        .setDescription('The token ID for the DNA image')
+    .addStringOption(option => 
+      option.setName('identifier')
+        .setDescription('The MoonCat rescue index or hex ID')
         .setRequired(true)),
   new SlashCommandBuilder()
     .setName('acc')
@@ -78,8 +78,21 @@ client.on('interactionCreate', async interaction => {
   try {
     await interaction.deferReply();
 
-    if (commandName === 'mc') {
-      const tokenId = options.getInteger('tokenid');
+    if (commandName === 'mc' || commandName === 'mcacc' || commandName === 'dna') {
+      const identifier = options.getString('identifier');
+
+      let tokenId;
+      if (identifier.startsWith('0x')) {
+        // If the identifier starts with "0x", treat it as a hex ID
+        tokenId = identifier;
+      } else if (!isNaN(parseInt(identifier))) {
+        // Otherwise, treat it as a rescue index
+        tokenId = parseInt(identifier);
+      } else {
+        await interaction.editReply(`Invalid identifier: ${identifier}`);
+        return;
+      }
+
       const moonCatDetails = await getMoonCatNameOrId(tokenId);
       const imageUrl = await getMoonCatImageURL(tokenId);
 
@@ -104,37 +117,7 @@ client.on('interactionCreate', async interaction => {
         };
         await interaction.editReply({ embeds: [embed] });
       } else {
-        await interaction.editReply(`Sorry, I couldn't find details for MoonCat with token ID: ${tokenId}`);
-      }
-    }
-
-    if (commandName === 'mcacc') {
-      const tokenId = options.getInteger('tokenid');
-      const moonCatDetails = await getMoonCatNameOrId(tokenId);
-      const accessorizedImageUrl = `https://api.mooncat.community/accessorized-image/${tokenId}.png`;
-
-      if (moonCatDetails) {
-        const rescueIndex = moonCatDetails.details.rescueIndex;
-        const hexId = moonCatDetails.details.catId;
-
-        let name = moonCatDetails.details.name;
-        if (name) {
-          name = name.replace(" (accessorized)", "");
-        }
-
-        const title = name ? `MoonCat #${rescueIndex}: ${name}` : `MoonCat #${rescueIndex}: ${hexId}`;
-
-        const chainStationLink = `https://chainstation.mooncatrescue.com/mooncats/${tokenId}`;
-
-        const embed = {
-          color: 3447003,
-          title: title,
-          url: chainStationLink,
-          image: { url: accessorizedImageUrl }
-        };
-        await interaction.editReply({ embeds: [embed] });
-      } else {
-        await interaction.editReply(`Sorry, I couldn't find details for MoonCat with token ID: ${tokenId}`);
+        await interaction.editReply(`Sorry, I couldn't find details for MoonCat with identifier: ${identifier}`);
       }
     }
 
@@ -241,30 +224,6 @@ client.on('interactionCreate', async interaction => {
       } else {
         console.log(`No active listings found for MoonCats with accessory ID: ${accessoryId}`);
         await interaction.editReply(`None of the MoonCats with accessory ID ${accessoryId} are currently listed for sale.`);
-      }
-    }
-
-    if (commandName === 'dna') {
-      const tokenId = options.getInteger('tokenid');
-      const moonCatDetails = await getMoonCatNameOrId(tokenId);
-      const dnaImageUrl = await getDNAImageURL(tokenId);
-
-      if (dnaImageUrl) {
-        let name = moonCatDetails?.details?.name || null;
-        const hexId = moonCatDetails?.details?.catId || tokenId;
-
-        if (name) {
-          name = name.replace(" (accessorized)", "");
-        }
-
-        const title = `MoonCat #${tokenId}:`;
-        const clickableText = name ? `[${name}](${dnaImageUrl})` : `[${hexId}](${dnaImageUrl})`;
-
-        const message = `${title} ${clickableText}`;
-
-        await interaction.editReply({ content: message });
-      } else {
-        await interaction.editReply(`Sorry, I couldn't fetch the DNA image for MoonCat with token ID: ${tokenId}`);
       }
     }
 
