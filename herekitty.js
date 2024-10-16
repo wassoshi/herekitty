@@ -122,7 +122,7 @@ client.on('interactionCreate', async interaction => {
 
         const title = name ? `MoonCat #${rescueIndex}: ${name}` : `MoonCat #${rescueIndex}: ${hexId}`;
 
-        const chainStationLink = `https://chainstation.mooncatrescue.com/mooncats/${tokenId}`;
+        const chainStationLink = `https://chainstation.mooncatrescue.com/mooncats/${rescueIndex}`;
 
         const embed = {
           color: 3447003,
@@ -151,7 +151,7 @@ client.on('interactionCreate', async interaction => {
 
         const title = name ? `MoonCat #${rescueIndex}: ${name}` : `MoonCat #${rescueIndex}: ${hexId}`;
 
-        const chainStationLink = `https://chainstation.mooncatrescue.com/mooncats/${tokenId}`;
+        const chainStationLink = `https://chainstation.mooncatrescue.com/mooncats/${rescueIndex}`;
 
         const embed = {
           color: 3447003,
@@ -176,7 +176,7 @@ client.on('interactionCreate', async interaction => {
       let moonCatDetails = null;
 
       if (tokenId.startsWith('0x')) {
-        const moonCatDetails = await getMoonCatNameOrId(tokenId);
+        moonCatDetails = await getMoonCatNameOrId(tokenId);
         if (moonCatDetails) {
           rescueIndex = moonCatDetails.details.rescueIndex;
         } else {
@@ -189,7 +189,6 @@ client.on('interactionCreate', async interaction => {
 
       if (dnaImageUrl) {
         let name = moonCatDetails?.details?.name || null;
-        const rescueIndex = moonCatDetails?.details?.rescueIndex || tokenId;
         const hexId = moonCatDetails?.details?.catId || tokenId;
 
         if (name) {
@@ -200,8 +199,9 @@ client.on('interactionCreate', async interaction => {
         const message = `MoonCat #${rescueIndex}: ${clickableText}`;
 
         await interaction.editReply({ content: message });
-    } else {
+      } else {
         await interaction.editReply(`Sorry, I couldn't fetch the DNA image for MoonCat with token ID: ${tokenId}`);
+      }
     }
 
     if (commandName === 'acc') {
@@ -213,14 +213,10 @@ client.on('interactionCreate', async interaction => {
         await interaction.editReply(`Could not fetch accessory details for accessory ID: ${accessoryId}`);
         return;
       }
-      console.log("Accessory Details: ", accessoryDetails);
-      console.log("OwnedBy List: ", accessoryDetails.ownedBy);
       const ownersList = accessoryDetails.ownedBy?.list;
-      console.log("Owners List: ", ownersList);
       if (ownersList && ownersList.length > 0) {
         const randomIndex = Math.floor(Math.random() * ownersList.length);
         const randomMoonCatId = ownersList[randomIndex].rescueOrder;
-        console.log(`Selected MoonCat ID: ${randomMoonCatId} for Accessory ID: ${accessoryId}`);
 
         const accessorizedImageUrl = `https://api.mooncat.community/image/${randomMoonCatId}?costumes=true&acc=${accessoryId}`;
 
@@ -235,7 +231,6 @@ client.on('interactionCreate', async interaction => {
 
         await interaction.editReply({ embeds: [embed] });
       } else {
-        console.log("Fallback: No MoonCats own this accessory");
         const accessorizedImageUrl = `https://api.mooncat.community/accessory-image/${accessoryId}.png`;
         const chainStationLink = `https://chainstation.mooncatrescue.com/accessories/${accessoryId}`;
 
@@ -252,27 +247,19 @@ client.on('interactionCreate', async interaction => {
 
     if (commandName === 'accsale') {
       const accessoryId = options.getInteger('accessoryid');
-      console.log(`Fetching details for accessory ID: ${accessoryId}`);
       const accessoryDetails = await fetchAccessoryDetails(accessoryId);
 
       if (!accessoryDetails) {
-        console.log(`Could not fetch accessory details for accessory ID: ${accessoryId}`);
         await interaction.editReply(`Could not fetch accessory details for accessory ID: ${accessoryId}`);
         return;
       }
-      console.log(`Accessory Details for ID ${accessoryId}:`, accessoryDetails);
       const moonCatOwners = accessoryDetails.ownedBy?.list;
-      console.log(`MoonCat owners with this accessory (${accessoryId}):`, moonCatOwners);
 
       if (!moonCatOwners || moonCatOwners.length === 0) {
         await interaction.editReply(`No MoonCats found with accessory ID: ${accessoryId}`);
         return;
       }
-      moonCatOwners.forEach(owner => {
-        console.log(`MoonCat with rescue order ${owner.rescueOrder} owns accessory ID: ${accessoryId}`);
-      });
 
-      console.log(`Checking OpenSea listings for MoonCats with accessory ID: ${accessoryId}`);      
       const delayBetweenCalls = 350;
       const listings = [];
 
@@ -281,9 +268,7 @@ client.on('interactionCreate', async interaction => {
         const listing = await checkMoonCatListing(owner.rescueOrder, delayBetweenCalls);
         listings.push(listing);
       }
-      listings.forEach(listing => {
-        console.log(`Listing for MoonCat #${listing.tokenId}:`, listing);
-      });
+
       const activeListings = listings.filter(listing => listing.isActive);
 
       if (activeListings.length > 0) {
@@ -298,14 +283,12 @@ client.on('interactionCreate', async interaction => {
             }
           };
         });
-        console.log(`Active listings found:`, listingMessages);
 
         await interaction.editReply({
           content: `Active listings for accessory ID ${accessoryId}:`,
           embeds: listingMessages.map(message => message.embed)
         });
       } else {
-        console.log(`No active listings found for MoonCats with accessory ID: ${accessoryId}`);
         await interaction.editReply(`None of the MoonCats with accessory ID ${accessoryId} are currently listed for sale.`);
       }
     }
@@ -404,7 +387,6 @@ async function checkMoonCatListing(tokenId, delayBetweenCalls = 350) {
   const listingEvents = await fetchOpenSeaEvents(tokenId, 'listing', delayBetweenCalls);
 
   if (listingEvents.length === 0) {
-    console.log(`No listing events found for token ${tokenId}`);
     return { isActive: false, tokenId };
   }
 
@@ -416,7 +398,6 @@ async function checkMoonCatListing(tokenId, delayBetweenCalls = 350) {
   const latestListing = listingEvents.find(event => event.event_type === 'order' && event.order_type === 'listing');
   if (latestListing) {
     const { start_date, expiration_date, asset, payment } = latestListing;
-    console.log(`Token ${tokenId}: start_date = ${start_date}, expiration_date = ${expiration_date}, now = ${now}`);
 
     if (start_date <= now && expiration_date > now) {
       isActive = true;
@@ -432,14 +413,12 @@ async function checkMoonCatListing(tokenId, delayBetweenCalls = 350) {
   const latestTransfer = transferEvents.find(event => event.event_timestamp > latestListing?.start_date);
 
   if (latestSale || latestTransfer) {
-    console.log(`Sale or transfer detected for token ${tokenId}, deactivating listing.`);
     isActive = false;
   }
 
   if (isActive) {
     return { isActive, tokenId, price, url: listingUrl };
   } else {
-    console.log(`Listing not active for token ${tokenId}.`);
     return { isActive: false, tokenId };
   }
 }
