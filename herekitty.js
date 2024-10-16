@@ -58,8 +58,26 @@ const commands = [
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
 
+async function clearOldCommands() {
+  try {
+    const currentCommands = await rest.get(
+      Routes.applicationCommands(client.user.id)
+    );
+    for (const command of currentCommands) {
+      await rest.delete(
+        Routes.applicationCommand(client.user.id, command.id)
+      );
+      console.log(`Deleted command ${command.name}`);
+    }
+  } catch (error) {
+    console.error('Error deleting old commands:', error);
+  }
+}
+
 client.once('ready', async () => {
   try {
+    await clearOldCommands();
+
     await rest.put(
       Routes.applicationCommands(client.user.id),
       { body: commands }
