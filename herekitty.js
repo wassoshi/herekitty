@@ -189,8 +189,8 @@ client.on('interactionCreate', async interaction => {
 
       if (dnaImageUrl) {
         let name = moonCatDetails?.details?.name || null;
-        const title = `MoonCat #${rescueIndex}:`;
-        const clickableText = name ? `[${name}](${dnaImageUrl})` : `[MoonCat #${rescueIndex}](${dnaImageUrl})`;
+        const title = name ? `MoonCat #${rescueIndex}: ${name}` : `MoonCat #${rescueIndex}`;
+        const clickableText = `[MoonCat #${rescueIndex}](${dnaImageUrl})`;
 
         const message = `${title} ${clickableText}`;
 
