@@ -173,11 +173,12 @@ client.on('interactionCreate', async interaction => {
       }
 
       let rescueIndex = tokenId;
+      let moonCatDetails = null;
 
       if (tokenId.startsWith('0x')) {
         const moonCatDetails = await getMoonCatNameOrId(tokenId);
         if (moonCatDetails) {
-          rescueIndex = moonCatDetails.details.rescueIndex; // Use rescue index derived from hex
+          rescueIndex = moonCatDetails.details.rescueIndex;
         } else {
           await interaction.editReply(`Sorry, couldn't find details for MoonCat with hex ID: ${tokenId}`);
           return;
