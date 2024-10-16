@@ -76,7 +76,7 @@ async function clearOldCommands() {
 
 client.once('ready', async () => {
   try {
-    await clearOldCommands();
+    await clearOldCommands();  // Make sure we clear old commands
 
     await rest.put(
       Routes.applicationCommands(client.user.id),
@@ -99,12 +99,15 @@ client.on('interactionCreate', async interaction => {
     if (commandName === 'mc' || commandName === 'mcacc' || commandName === 'dna') {
       const identifier = options.getString('identifier');
 
+      if (!identifier) {
+        await interaction.editReply('Please provide a valid identifier.');
+        return;
+      }
+
       let tokenId;
       if (identifier.startsWith('0x')) {
-        // If the identifier starts with "0x", treat it as a hex ID
         tokenId = identifier;
       } else if (!isNaN(parseInt(identifier))) {
-        // Otherwise, treat it as a rescue index
         tokenId = parseInt(identifier);
       } else {
         await interaction.editReply(`Invalid identifier: ${identifier}`);
