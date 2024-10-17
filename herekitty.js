@@ -94,7 +94,7 @@ client.on('interactionCreate', async interaction => {
 
   try {
     try {
-      await interaction.deferReply({ ephemeral: true });
+      await interaction.deferReply();
     } catch (error) {
       if (error.code === 10062) {
         console.error('Interaction expired before it could be deferred:', error);
