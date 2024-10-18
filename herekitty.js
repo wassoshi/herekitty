@@ -93,21 +93,12 @@ client.on('interactionCreate', async interaction => {
   const { commandName, options } = interaction;
 
   try {
-    try {
-      await interaction.deferReply();
-    } catch (error) {
-      if (error.code === 10062) {
-        console.error('Interaction expired before it could be deferred:', error);
-        return;
-      }
-      throw error;
-    }
+    await interaction.deferReply();
 
     const identifier = options.getString('identifier');
     let tokenId;
 
-
-    if (identifier.startsWith('0x')) {
+    if (identifier && identifier.startsWith('0x')) {
       const moonCatDetails = await getMoonCatNameOrId(identifier);
       if (moonCatDetails) {
         tokenId = moonCatDetails.details.rescueIndex;
@@ -115,9 +106,9 @@ client.on('interactionCreate', async interaction => {
         await interaction.editReply(`Sorry, I couldn't find details for MoonCat with hex ID: ${identifier}`);
         return;
       }
-    } else if (!isNaN(parseInt(identifier))) {
+    } else if (identifier && !isNaN(parseInt(identifier))) {
       tokenId = parseInt(identifier);
-    } else {
+    } else if (commandName !== 'wrp') {
       await interaction.editReply(`Invalid identifier: ${identifier}`);
       return;
     }
@@ -136,7 +127,6 @@ client.on('interactionCreate', async interaction => {
         }
 
         const title = name ? `MoonCat #${rescueIndex}: ${name}` : `MoonCat #${rescueIndex}: ${hexId}`;
-
         const chainStationLink = `https://chainstation.mooncatrescue.com/mooncats/${rescueIndex}`;
 
         const embed = {
@@ -146,15 +136,7 @@ client.on('interactionCreate', async interaction => {
           image: { url: imageUrl }
         };
 
-        try {
-          await interaction.editReply({ embeds: [embed] });
-        } catch (error) {
-          if (error.code === 'InteractionNotReplied') {
-            console.error('Interaction was not replied in time:', error);
-          } else {
-            throw error;
-          }
-        }
+        await interaction.editReply({ embeds: [embed] });
       } else {
         await interaction.editReply(`Sorry, I couldn't find details for MoonCat with token ID: ${tokenId}`);
       }
@@ -183,15 +165,7 @@ client.on('interactionCreate', async interaction => {
           image: { url: accessorizedImageUrl }
         };
 
-        try {
-          await interaction.editReply({ embeds: [embed] });
-        } catch (error) {
-          if (error.code === 'InteractionNotReplied') {
-            console.error('Interaction was not replied in time:', error);
-          } else {
-            throw error;
-          }
-        }
+        await interaction.editReply({ embeds: [embed] });
       } else {
         await interaction.editReply(`Sorry, I couldn't find details for MoonCat with token ID: ${tokenId}`);
       }
@@ -230,15 +204,7 @@ client.on('interactionCreate', async interaction => {
         const clickableText = name ? `[${name}](${dnaImageUrl})` : `[${hexId}](${dnaImageUrl})`;
         const message = `MoonCat #${rescueIndex}: ${clickableText}`;
 
-        try {
-          await interaction.editReply({ content: message });
-        } catch (error) {
-          if (error.code === 'InteractionNotReplied') {
-            console.error('Interaction was not replied in time:', error);
-          } else {
-            throw error;
-          }
-        }
+        await interaction.editReply({ content: message });
       } else {
         await interaction.editReply(`Sorry, I couldn't fetch the DNA image for MoonCat with token ID: ${identifier}`);
       }
@@ -246,20 +212,19 @@ client.on('interactionCreate', async interaction => {
 
     if (commandName === 'acc') {
       const accessoryId = options.getInteger('accessoryid');
-      
       const accessoryDetails = await fetchAccessoryDetails(accessoryId);
 
       if (!accessoryDetails) {
         await interaction.editReply(`Could not fetch accessory details for accessory ID: ${accessoryId}`);
         return;
       }
+
       const ownersList = accessoryDetails.ownedBy?.list;
       if (ownersList && ownersList.length > 0) {
         const randomIndex = Math.floor(Math.random() * ownersList.length);
         const randomMoonCatId = ownersList[randomIndex].rescueOrder;
 
         const accessorizedImageUrl = `https://api.mooncat.community/image/${randomMoonCatId}?costumes=true&acc=${accessoryId}`;
-
         const chainStationLink = `https://chainstation.mooncatrescue.com/accessories/${accessoryId}`;
 
         const embed = {
@@ -269,15 +234,7 @@ client.on('interactionCreate', async interaction => {
           image: { url: accessorizedImageUrl }
         };
 
-        try {
-          await interaction.editReply({ embeds: [embed] });
-        } catch (error) {
-          if (error.code === 'InteractionNotReplied') {
-            console.error('Interaction was not replied in time:', error);
-          } else {
-            throw error;
-          }
-        }
+        await interaction.editReply({ embeds: [embed] });
       } else {
         const accessorizedImageUrl = `https://api.mooncat.community/accessory-image/${accessoryId}.png`;
         const chainStationLink = `https://chainstation.mooncatrescue.com/accessories/${accessoryId}`;
@@ -289,15 +246,7 @@ client.on('interactionCreate', async interaction => {
           image: { url: accessorizedImageUrl }
         };
 
-        try {
-          await interaction.editReply({ embeds: [embed] });
-        } catch (error) {
-          if (error.code === 'InteractionNotReplied') {
-            console.error('Interaction was not replied in time:', error);
-          } else {
-            throw error;
-          }
-        }
+        await interaction.editReply({ embeds: [embed] });
       }
     }
 
@@ -340,18 +289,10 @@ client.on('interactionCreate', async interaction => {
           };
         });
 
-        try {
-          await interaction.editReply({
-            content: `Active listings for accessory ID ${accessoryId}:`,
-            embeds: listingMessages.map(message => message.embed)
-          });
-        } catch (error) {
-          if (error.code === 'InteractionNotReplied') {
-            console.error('Interaction was not replied in time:', error);
-          } else {
-            throw error;
-          }
-        }
+        await interaction.editReply({
+          content: `Active listings for accessory ID ${accessoryId}:`,
+          embeds: listingMessages.map(message => message.embed)
+        });
       } else {
         await interaction.editReply(`None of the MoonCats with accessory ID ${accessoryId} are currently listed for sale.`);
       }
@@ -359,6 +300,11 @@ client.on('interactionCreate', async interaction => {
 
     if (commandName === 'wrp') {
       const tokenId = options.getInteger('tokenid');
+      if (!tokenId) {
+        await interaction.editReply('Invalid token ID provided.');
+        return;
+      }
+
       const rescueIndex = await getRescueIndexFromWrapper(tokenId);
 
       if (rescueIndex) {
@@ -383,18 +329,10 @@ client.on('interactionCreate', async interaction => {
             image: { url: imageUrl }
           };
 
-          try {
-            await interaction.editReply({
-              content: `wrapped token ID ${tokenId} is Rescue Index #${rescueIndex}`,
-              embeds: [embed]
-            });
-          } catch (error) {
-            if (error.code === 'InteractionNotReplied') {
-              console.error('Interaction was not replied in time:', error);
-            } else {
-              throw error;
-            }
-          }
+          await interaction.editReply({
+            content: `wrapped token ID ${tokenId} is Rescue Index #${rescueIndex}`,
+            embeds: [embed]
+          });
         } else {
           await interaction.editReply(`wrapped token ID ${tokenId} is Rescue Index #${rescueIndex}, but could not fetch additional details.`);
         }
@@ -402,6 +340,7 @@ client.on('interactionCreate', async interaction => {
         await interaction.editReply('Could not fetch rescue index.');
       }
     }
+
   } catch (error) {
     console.error('Error handling interaction:', error);
     await interaction.editReply('An error occurred while processing the command.');
