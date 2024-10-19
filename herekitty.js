@@ -95,123 +95,125 @@ client.on('interactionCreate', async interaction => {
   try {
     await interaction.deferReply();
 
-    const identifier = options.getString('identifier');
-    let tokenId;
+    if (commandName === 'mc' || commandName === 'mcacc' || commandName === 'dna') {
+      const identifier = options.getString('identifier');
+      let tokenId;
 
-    if (identifier && identifier.startsWith('0x')) {
-      const moonCatDetails = await getMoonCatNameOrId(identifier);
-      if (moonCatDetails) {
-        tokenId = moonCatDetails.details.rescueIndex;
-      } else {
-        await interaction.editReply(`Sorry, I couldn't find details for MoonCat with hex ID: ${identifier}`);
-        return;
-      }
-    } else if (identifier && !isNaN(parseInt(identifier))) {
-      tokenId = parseInt(identifier);
-    } else if (commandName !== 'wrp') {
-      await interaction.editReply(`Invalid identifier: ${identifier}`);
-      return;
-    }
-
-    if (commandName === 'mc') {
-      const moonCatDetails = await getMoonCatNameOrId(tokenId);
-      const imageUrl = await getMoonCatImageURL(tokenId);
-
-      if (moonCatDetails && imageUrl) {
-        const rescueIndex = moonCatDetails.details.rescueIndex;
-        const hexId = moonCatDetails.details.catId;
-
-        let name = moonCatDetails.details.name;
-        if (name) {
-          name = name.replace(" (accessorized)", "");
-        }
-
-        const title = name ? `MoonCat #${rescueIndex}: ${name}` : `MoonCat #${rescueIndex}: ${hexId}`;
-        const chainStationLink = `https://chainstation.mooncatrescue.com/mooncats/${rescueIndex}`;
-
-        const embed = {
-          color: 3447003,
-          title: title,
-          url: chainStationLink,
-          image: { url: imageUrl }
-        };
-
-        await interaction.editReply({ embeds: [embed] });
-      } else {
-        await interaction.editReply(`Sorry, I couldn't find details for MoonCat with token ID: ${tokenId}`);
-      }
-    }
-
-    if (commandName === 'mcacc') {
-      const accessorizedImageUrl = `https://api.mooncat.community/accessorized-image/${tokenId}.png`;
-      const moonCatDetails = await getMoonCatNameOrId(tokenId);
-
-      if (moonCatDetails) {
-        const rescueIndex = moonCatDetails.details.rescueIndex;
-        const hexId = moonCatDetails.details.catId;
-
-        let name = moonCatDetails.details.name;
-        if (name) {
-          name = name.replace(" (accessorized)", "");
-        }
-
-        const title = name ? `MoonCat #${rescueIndex}: ${name}` : `MoonCat #${rescueIndex}: ${hexId}`;
-        const chainStationLink = `https://chainstation.mooncatrescue.com/mooncats/${rescueIndex}`;
-
-        const embed = {
-          color: 3447003,
-          title: title,
-          url: chainStationLink,
-          image: { url: accessorizedImageUrl }
-        };
-
-        await interaction.editReply({ embeds: [embed] });
-      } else {
-        await interaction.editReply(`Sorry, I couldn't find details for MoonCat with token ID: ${tokenId}`);
-      }
-    }
-
-    if (commandName === 'dna') {
-      let rescueIndex = null;
-      let moonCatDetails = null;
-
-      if (identifier.startsWith('0x')) {
-        moonCatDetails = await getMoonCatNameOrId(identifier);
+      if (identifier && identifier.startsWith('0x')) {
+        const moonCatDetails = await getMoonCatNameOrId(identifier);
         if (moonCatDetails) {
-          rescueIndex = moonCatDetails.details.rescueIndex;
+          tokenId = moonCatDetails.details.rescueIndex;
         } else {
-          await interaction.editReply(`Sorry, couldn't find details for MoonCat with hex ID: ${identifier}`);
+          await interaction.editReply(`Sorry, I couldn't find details for MoonCat with hex ID: ${identifier}`);
           return;
         }
-      } else if (!isNaN(identifier)) {
-        rescueIndex = identifier;
-        moonCatDetails = await getMoonCatNameOrId(rescueIndex);
+      } else if (identifier && !isNaN(parseInt(identifier))) {
+        tokenId = parseInt(identifier);
       } else {
-        await interaction.editReply(`Invalid identifier format.`);
+        await interaction.editReply(`Invalid identifier: ${identifier}`);
         return;
       }
 
-      const dnaImageUrl = await getDNAImageURL(rescueIndex);
+      if (commandName === 'mc') {
+        const moonCatDetails = await getMoonCatNameOrId(tokenId);
+        const imageUrl = await getMoonCatImageURL(tokenId);
 
-      if (dnaImageUrl) {
-        let name = moonCatDetails?.details?.name || null;
-        const hexId = moonCatDetails?.details?.catId || identifier;
+        if (moonCatDetails && imageUrl) {
+          const rescueIndex = moonCatDetails.details.rescueIndex;
+          const hexId = moonCatDetails.details.catId;
 
-        if (name) {
+          let name = moonCatDetails.details.name;
+          if (name) {
             name = name.replace(" (accessorized)", "");
+          }
+
+          const title = name ? `MoonCat #${rescueIndex}: ${name}` : `MoonCat #${rescueIndex}: ${hexId}`;
+          const chainStationLink = `https://chainstation.mooncatrescue.com/mooncats/${rescueIndex}`;
+
+          const embed = {
+            color: 3447003,
+            title: title,
+            url: chainStationLink,
+            image: { url: imageUrl }
+          };
+
+          await interaction.editReply({ embeds: [embed] });
+        } else {
+          await interaction.editReply(`Sorry, I couldn't find details for MoonCat with token ID: ${tokenId}`);
+        }
+      }
+
+      if (commandName === 'mcacc') {
+        const accessorizedImageUrl = `https://api.mooncat.community/accessorized-image/${tokenId}.png`;
+        const moonCatDetails = await getMoonCatNameOrId(tokenId);
+
+        if (moonCatDetails) {
+          const rescueIndex = moonCatDetails.details.rescueIndex;
+          const hexId = moonCatDetails.details.catId;
+
+          let name = moonCatDetails.details.name;
+          if (name) {
+            name = name.replace(" (accessorized)", "");
+          }
+
+          const title = name ? `MoonCat #${rescueIndex}: ${name}` : `MoonCat #${rescueIndex}: ${hexId}`;
+          const chainStationLink = `https://chainstation.mooncatrescue.com/mooncats/${rescueIndex}`;
+
+          const embed = {
+            color: 3447003,
+            title: title,
+            url: chainStationLink,
+            image: { url: accessorizedImageUrl }
+          };
+
+          await interaction.editReply({ embeds: [embed] });
+        } else {
+          await interaction.editReply(`Sorry, I couldn't find details for MoonCat with token ID: ${tokenId}`);
+        }
+      }
+
+      if (commandName === 'dna') {
+        let rescueIndex = null;
+        let moonCatDetails = null;
+
+        if (identifier.startsWith('0x')) {
+          moonCatDetails = await getMoonCatNameOrId(identifier);
+          if (moonCatDetails) {
+            rescueIndex = moonCatDetails.details.rescueIndex;
+          } else {
+            await interaction.editReply(`Sorry, couldn't find details for MoonCat with hex ID: ${identifier}`);
+            return;
+          }
+        } else if (!isNaN(identifier)) {
+          rescueIndex = identifier;
+          moonCatDetails = await getMoonCatNameOrId(rescueIndex);
+        } else {
+          await interaction.editReply(`Invalid identifier format.`);
+          return;
         }
 
-        const clickableText = name ? `[${name}](${dnaImageUrl})` : `[${hexId}](${dnaImageUrl})`;
-        const message = `MoonCat #${rescueIndex}: ${clickableText}`;
+        const dnaImageUrl = await getDNAImageURL(rescueIndex);
 
-        await interaction.editReply({ content: message });
-      } else {
-        await interaction.editReply(`Sorry, I couldn't fetch the DNA image for MoonCat with token ID: ${identifier}`);
+        if (dnaImageUrl) {
+          let name = moonCatDetails?.details?.name || null;
+          const hexId = moonCatDetails?.details?.catId || identifier;
+
+          if (name) {
+              name = name.replace(" (accessorized)", "");
+          }
+
+          const clickableText = name ? `[${name}](${dnaImageUrl})` : `[${hexId}](${dnaImageUrl})`;
+          const message = `MoonCat #${rescueIndex}: ${clickableText}`;
+
+          await interaction.editReply({ content: message });
+        } else {
+          await interaction.editReply(`Sorry, I couldn't fetch the DNA image for MoonCat with token ID: ${identifier}`);
+        }
       }
-    }
 
-    if (commandName === 'acc') {
+    } else if (commandName === 'acc') {
       const accessoryId = options.getInteger('accessoryid');
+
       const accessoryDetails = await fetchAccessoryDetails(accessoryId);
 
       if (!accessoryDetails) {
@@ -248,9 +250,8 @@ client.on('interactionCreate', async interaction => {
 
         await interaction.editReply({ embeds: [embed] });
       }
-    }
 
-    if (commandName === 'accsale') {
+    } else if (commandName === 'accsale') {
       const accessoryId = options.getInteger('accessoryid');
       const accessoryDetails = await fetchAccessoryDetails(accessoryId);
 
@@ -296,9 +297,8 @@ client.on('interactionCreate', async interaction => {
       } else {
         await interaction.editReply(`None of the MoonCats with accessory ID ${accessoryId} are currently listed for sale.`);
       }
-    }
 
-    if (commandName === 'wrp') {
+    } else if (commandName === 'wrp') {
       const tokenId = options.getInteger('tokenid');
       if (!tokenId) {
         await interaction.editReply('Invalid token ID provided.');
@@ -330,15 +330,18 @@ client.on('interactionCreate', async interaction => {
           };
 
           await interaction.editReply({
-            content: `wrapped token ID ${tokenId} is Rescue Index #${rescueIndex}`,
+            content: `Wrapped token ID ${tokenId} is Rescue Index #${rescueIndex}`,
             embeds: [embed]
           });
         } else {
-          await interaction.editReply(`wrapped token ID ${tokenId} is Rescue Index #${rescueIndex}, but could not fetch additional details.`);
+          await interaction.editReply(`Wrapped token ID ${tokenId} is Rescue Index #${rescueIndex}, but could not fetch additional details.`);
         }
       } else {
         await interaction.editReply('Could not fetch rescue index.');
       }
+
+    } else {
+      await interaction.editReply('Unknown command.');
     }
 
   } catch (error) {
