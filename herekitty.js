@@ -34,6 +34,9 @@ const commands = [
         .setDescription('The MoonCat rescue index or hex ID')
         .setRequired(true)),
   new SlashCommandBuilder()
+    .setName('catme')
+    .setDescription('Fetch image for a random MoonCat'),
+  new SlashCommandBuilder()
     .setName('acc')
     .setDescription('Fetch a random MoonCat with a specified accessory')
     .addIntegerOption(option => 
@@ -211,6 +214,36 @@ client.on('interactionCreate', async interaction => {
         }
       }
 
+    } else if (commandName === 'catme') {
+		const tokenId = Math.floor(Math.random() * 25440);
+        const moonCatDetails = await getMoonCatNameOrId(tokenId);
+        const imageUrl = await getMoonCatImageURL(tokenId);
+
+        if (moonCatDetails && imageUrl) {
+          const rescueIndex = moonCatDetails.details.rescueIndex;
+          const hexId = moonCatDetails.details.catId;
+
+          let name = moonCatDetails.details.name;
+          if (name) {
+            name = name.replace(" (accessorized)", "");
+          }
+
+          const title = name ? `MoonCat #${rescueIndex}: ${name}` : `MoonCat #${rescueIndex}: ${hexId}`;
+          const chainStationLink = `https://chainstation.mooncatrescue.com/mooncats/${rescueIndex}`;
+
+          const embed = {
+            color: 3447003,
+            title: title,
+            url: chainStationLink,
+            image: { url: imageUrl }
+          };
+
+          await interaction.editReply({ embeds: [embed] });
+        } else {
+          await interaction.editReply(`Sorry, I couldn't find details for MoonCat with token ID: ${tokenId}`);
+        }
+      }
+      
     } else if (commandName === 'acc') {
       const accessoryId = options.getInteger('accessoryid');
 
