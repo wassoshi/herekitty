@@ -64,11 +64,11 @@ const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
 async function clearOldCommands() {
   try {
     const currentCommands = await rest.get(
-      Routes.applicationCommands(client.user.id)
+      Routes.applicationCommands(process.env.CLIENT_ID)
     );
     for (const command of currentCommands) {
       await rest.delete(
-        Routes.applicationCommand(client.user.id, command.id)
+        Routes.applicationCommand(process.env.CLIENT_ID, command.id)
       );
     }
   } catch (error) {
@@ -78,11 +78,11 @@ async function clearOldCommands() {
 
 client.once('ready', async () => {
   try {
+    const route = process.env.GUILD_ID
+      ? Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID)
+      : Routes.applicationCommands(process.env.CLIENT_ID);
 
-    await rest.put(
-      Routes.applicationCommands(client.user.id),
-      { body: commands }
-    );
+    await rest.put(route, { body: commands });
   } catch (error) {
     console.error(error);
   }
