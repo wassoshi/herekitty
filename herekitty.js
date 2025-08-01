@@ -1,4 +1,3 @@
-// herekitty.js
 import { AlchemyProvider, Contract } from 'ethers';
 import fetch from 'node-fetch';
 import { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from 'discord.js';
@@ -25,6 +24,20 @@ const commands = [
 ].map(c => c.toJSON());
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
+
+async function clearOldCommands() {
+  try {
+    await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: [] });
+  } catch (_) {}
+  if (process.env.GUILD_ID) {
+    try {
+      await rest.put(
+        Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
+        { body: [] }
+      );
+    } catch (_) {}
+  }
+}
 
 client.once('ready', async () => {
   await clearOldCommands();
