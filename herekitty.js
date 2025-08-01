@@ -78,7 +78,6 @@ async function clearOldCommands() {
 
 client.once('ready', async () => {
   try {
-    await clearOldCommands();
 
     await rest.put(
       Routes.applicationCommands(client.user.id),
