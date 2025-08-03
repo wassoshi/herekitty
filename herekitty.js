@@ -20,7 +20,8 @@ const commands = [
   new SlashCommandBuilder().setName('wrp').setDescription('Fetch rescue index from old wrapper token ID')
     .addIntegerOption(o => o.setName('tokenid').setDescription('The old wrapper token ID').setRequired(true)),
   new SlashCommandBuilder().setName('accsale').setDescription('Check which MoonCats with a specific accessory are listed for sale')
-    .addIntegerOption(o => o.setName('accessoryid').setDescription('The accessory ID').setRequired(true))
+    .addIntegerOption(o => o.setName('accessoryid').setDescription('The accessory ID').setRequired(true)),
+  new SlashCommandBuilder().setName('floor').setDescription('Check the floor price of MoonCats')
 ].map(c => c.toJSON());
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
@@ -161,6 +162,32 @@ client.on('interactionCreate', async interaction => {
       const hex  = d.details.catId;
       const title = name ? `MoonCat #${idx}: ${name}` : `MoonCat #${idx}: ${hex}`;
       await interaction.editReply({ content: `Wrapped token ID ${tokenId} is Rescue Index #${idx}`, embeds: [{ color: 3447003, title, url: `https://chainstation.mooncatrescue.com/mooncats/${idx}`, image: { url: img } }] });
+
+    } else if (commandName === 'floor') {
+      /* -------------- floor -------------- */
+      const slug = 'acclimatedmooncats'; // Official OpenSea slug for MoonCats
+      const url = `https://api.opensea.io/api/v2/collections/${slug}/stats`;
+      try {
+      const response = await fetch(url, {
+        headers: {
+          'Accept': 'application/json',
+          ...(process.env.OPENSEA_API_KEY && { 'X-API-KEY': process.env.OPENSEA_API_KEY })
+        }
+      });
+      if (!response.ok) {
+        return await interaction.editReply('⚠️ Could not fetch data from OpenSea.');
+      }
+      const data = await response.json();
+      const floor = data?.total?.floor_price;
+      if (floor != null) {
+        await interaction.editReply(`🏷️ The current floor price of **MoonCats** is **${floor} ETH**.`);
+      } else {
+        await interaction.editReply(`❌ No floor price found for MoonCats.`);
+      }
+      } catch (error) {
+        console.error('Error fetching floor price:', error);
+        await interaction.editReply('❌ An error occurred while fetching the floor price.');
+      }
 
     } else {
       await interaction.editReply('Unknown command.');
