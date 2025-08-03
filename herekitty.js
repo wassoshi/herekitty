@@ -178,7 +178,7 @@ client.on('interactionCreate', async interaction => {
         return await interaction.editReply('⚠️ Could not fetch data from OpenSea.');
       }
       const data = await response.json();
-      const floor = data?.total?.floor_price;
+      const floor = data?.stats?.floor_price;
       if (floor != null) {
         await interaction.editReply(`🏷️ The current floor price of **MoonCats** is **${floor} ETH**.`);
       } else {
