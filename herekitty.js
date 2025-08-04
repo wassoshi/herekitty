@@ -21,6 +21,7 @@ const commands = [
     .addIntegerOption(o => o.setName('tokenid').setDescription('The old wrapper token ID').setRequired(true)),
   new SlashCommandBuilder().setName('accsale').setDescription('Check which MoonCats with a specific accessory are listed for sale')
     .addIntegerOption(o => o.setName('accessoryid').setDescription('The accessory ID').setRequired(true)),
+  new SlashCommandBuilder().setName('collection').setDescription('Fetch the collection categories image'),
   new SlashCommandBuilder().setName('floor').setDescription('Check the floor price of MoonCats')
 ].map(c => c.toJSON());
 
@@ -163,6 +164,11 @@ client.on('interactionCreate', async interaction => {
       const title = name ? `MoonCat #${idx}: ${name}` : `MoonCat #${idx}: ${hex}`;
       await interaction.editReply({ content: `Wrapped token ID ${tokenId} is Rescue Index #${idx}`, embeds: [{ color: 3447003, title, url: `https://chainstation.mooncatrescue.com/mooncats/${idx}`, image: { url: img } }] });
 
+    } else if (commandName === 'collection') { 
+      /* -------------- collection -------------- */
+      const url = `https://ratemymoon.cat/collection.jpg`;
+      await interaction.editReply({ content: 'See https://ratemymoon.cat/ for more info on character cats', embeds: [{ image: { url: url } }] });
+      
     } else if (commandName === 'floor') {
       /* -------------- floor -------------- */
       const slug = 'acclimatedmooncats'; // Official OpenSea slug for MoonCats
@@ -188,7 +194,7 @@ client.on('interactionCreate', async interaction => {
         console.error('Error fetching floor price:', error);
         await interaction.editReply('❌ An error occurred while fetching the floor price.');
       }
-
+         
     } else {
       await interaction.editReply('Unknown command.');
     }
