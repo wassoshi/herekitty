@@ -167,7 +167,7 @@ client.on('interactionCreate', async interaction => {
     } else if (commandName === 'collection') { 
       /* -------------- collection -------------- */
       const url = `https://ratemymoon.cat/collection.jpg`;
-      await interaction.editReply({ content: 'See https://ratemymoon.cat/ for more info on character cats', embeds: [{ image: { url: url } }] });
+      await interaction.editReply(url);
       
     } else if (commandName === 'floor') {
       /* -------------- floor -------------- */
