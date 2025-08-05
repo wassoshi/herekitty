@@ -22,6 +22,7 @@ const commands = [
   new SlashCommandBuilder().setName('accsale').setDescription('Check which MoonCats with a specific accessory are listed for sale')
     .addIntegerOption(o => o.setName('accessoryid').setDescription('The accessory ID').setRequired(true)),
   new SlashCommandBuilder().setName('collection').setDescription('Fetch the collection categories image'),
+  new SlashCommandBuilder().setName('citadel').setDescription('Fetch the citadel image'),
   new SlashCommandBuilder().setName('floor').setDescription('Check the floor price of MoonCats')
 ].map(c => c.toJSON());
 
@@ -168,6 +169,11 @@ client.on('interactionCreate', async interaction => {
       /* -------------- collection -------------- */
       const url = `https://ratemymoon.cat/collection.jpg`;
       await interaction.editReply(url);
+
+    } else if (commandName === 'citadel') { 
+      /* -------------- tower -------------- */
+      const url = `https://ratemymoon.cat/citadel.jpg`;
+      await interaction.editReply(url);  
       
     } else if (commandName === 'floor') {
       /* -------------- floor -------------- */
