@@ -27,7 +27,7 @@ const commands = [
     .addIntegerOption(o => o.setName('accessoryid').setDescription('The accessory ID').setRequired(true)),
   new SlashCommandBuilder().setName('collection').setDescription('Fetch the collection categories image'),
   new SlashCommandBuilder().setName('citadel').setDescription('Fetch the citadel image'),
-  new SlashCommandBuilder()
+new SlashCommandBuilder()
   .setName('floor')
   .setDescription('Check the floor price of MoonCats with optional filters')
   .addStringOption(option =>
@@ -289,10 +289,9 @@ client.on('interactionCreate', async interaction => {
       if (!allListings.length) {
         return await interaction.editReply(`❌ No active listings found for \`${category}\`.`);
       }
-
       const floor = Math.min(...allListings);
       await interaction.editReply(`🏷️ Floor price for **${category}** MoonCats: **${floor} ETH** (${allListings.length} listings found).`);
-    
+
     } else {
       await interaction.editReply('Unknown command.');
     }
