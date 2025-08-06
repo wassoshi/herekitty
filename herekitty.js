@@ -25,7 +25,6 @@ const commands = [
     .addIntegerOption(o => o.setName('tokenid').setDescription('The old wrapper token ID').setRequired(true)),
   new SlashCommandBuilder().setName('accsale').setDescription('Check which MoonCats with a specific accessory are listed for sale')
     .addIntegerOption(o => o.setName('accessoryid').setDescription('The accessory ID').setRequired(true)),
-  new SlashCommandBuilder().setName('floor').setDescription('Check the floor price of MoonCats'),
   new SlashCommandBuilder().setName('collection').setDescription('Fetch the collection categories image'),
   new SlashCommandBuilder().setName('citadel').setDescription('Fetch the citadel image'),
   new SlashCommandBuilder()
