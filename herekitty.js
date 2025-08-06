@@ -27,7 +27,7 @@ const commands = [
     .addIntegerOption(o => o.setName('accessoryid').setDescription('The accessory ID').setRequired(true)),
   new SlashCommandBuilder().setName('collection').setDescription('Fetch the collection categories image'),
   new SlashCommandBuilder().setName('citadel').setDescription('Fetch the citadel image'),
-new SlashCommandBuilder()
+  new SlashCommandBuilder()
   .setName('floor')
   .setDescription('Check the floor price of MoonCats with optional filters')
   .addStringOption(option =>
@@ -221,7 +221,7 @@ client.on('interactionCreate', async interaction => {
           const data = await response.json();
           const floor = data?.total?.floor_price;
           if (floor != null) {
-            await interaction.editReply(`🏷️ The current floor price of **MoonCats** is **${floor} ETH**.`);
+            await interaction.editReply(`<a:mooncats:939489975819464714> The current floor price of **MoonCats** is **${floor} ETH**.`);
           } else {
             await interaction.editReply(`❌ No floor price found for MoonCats.`);
           }
@@ -236,6 +236,23 @@ client.on('interactionCreate', async interaction => {
       if (!tokenIds || tokenIds.length === 0) {
         return await interaction.editReply(`❌ No MoonCats found for \`${category}\`.`);
       }
+
+      const emojiMap = {
+        day1: '<:hue_240_blue_pure:1138567084234788994>',
+        '2017': '<:hue_270_purple_tabby:1138567535550279832>',
+        '2018': '<:hue_000_red_tortie:1138528166059716650>',
+        '2019': '<:hue_120_green_spotted:1138546767739232276>',
+        '2020': '<:hue_180_cyan_tortie:1138566375334481960>',
+        garfield: '<:character_garfield_grumpy:938880748751061043>',
+        cheshire: '<:character_cheshire:938882483733278790>',
+        pinkpanther: '<:character_pink_panther:939083117451436072>',
+        alien: '<:character_alien_shy:938881921981755494>',
+        zombie: '<:character_zombie_pouting:938882752684630087>',
+        simba: '<:character_simba_shy:1138627065822842890>',
+        golden: '<:character_gold_shy:1138612059249049610>',
+        pikachu: '<:character_pika_smiling:1138628582780960768>',
+        genesis: '<:genesis_black:1166065497679335524>'
+      };
 
       await interaction.editReply(`🔍 Fetching listings for \`${category}\` MoonCats...`);
 
@@ -289,9 +306,11 @@ client.on('interactionCreate', async interaction => {
       if (!allListings.length) {
         return await interaction.editReply(`❌ No active listings found for \`${category}\`.`);
       }
-      const floor = Math.min(...allListings);
-      await interaction.editReply(`🏷️ Floor price for **${category}** MoonCats: **${floor} ETH** (${allListings.length} listings found).`);
 
+      const floor = Math.min(...allListings);
+      const emoji = emojiMap[category] || '';
+      await interaction.editReply(`${emoji} Floor price for **${category}** MoonCats: **${floor} ETH** (${allListings.length} listings found).`);
+    
     } else {
       await interaction.editReply('Unknown command.');
     }
