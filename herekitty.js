@@ -2,6 +2,10 @@ import { AlchemyProvider, Contract } from 'ethers';
 import fetch from 'node-fetch';
 import { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from 'discord.js';
 import dotenv from 'dotenv';
+// Dynamically import the JSON rescueOrder map
+import { readFile } from 'fs/promises';
+const categoryPath = new URL('./mooncat_rescueOrder_by_category.json', import.meta.url);
+const categoryJson = JSON.parse(await readFile(categoryPath, 'utf-8'));
 
 dotenv.config();
 
@@ -21,7 +25,32 @@ const commands = [
     .addIntegerOption(o => o.setName('tokenid').setDescription('The old wrapper token ID').setRequired(true)),
   new SlashCommandBuilder().setName('accsale').setDescription('Check which MoonCats with a specific accessory are listed for sale')
     .addIntegerOption(o => o.setName('accessoryid').setDescription('The accessory ID').setRequired(true)),
-  new SlashCommandBuilder().setName('floor').setDescription('Check the floor price of MoonCats')
+  new SlashCommandBuilder().setName('floor').setDescription('Check the floor price of MoonCats'),
+  new SlashCommandBuilder().setName('collection').setDescription('Fetch the collection categories image'),
+  new SlashCommandBuilder().setName('citadel').setDescription('Fetch the citadel image'),
+  new SlashCommandBuilder()
+  .setName('floor')
+  .setDescription('Check the floor price of MoonCats with optional filters')
+  .addStringOption(option =>
+    option.setName('category')
+      .setDescription('Optional MoonCat category filter')
+      .addChoices(
+        { name: 'day1', value: 'day1' },
+        { name: '2017', value: '2017' },
+        { name: '2018', value: '2018' },
+        { name: '2019', value: '2019' },
+        { name: '2020', value: '2020' },
+        { name: 'garfield', value: 'garfield' },
+        { name: 'cheshire', value: 'cheshire' },
+        { name: 'pinkpanther', value: 'pinkpanther' },
+        { name: 'alien', value: 'alien' },
+        { name: 'zombie', value: 'zombie' },
+        { name: 'simba', value: 'simba' },
+        { name: 'golden', value: 'golden' },
+        { name: 'pikachu', value: 'pikachu' },
+        { name: 'genesis', value: 'genesis' }
+      )
+  )
 ].map(c => c.toJSON());
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
@@ -163,32 +192,108 @@ client.on('interactionCreate', async interaction => {
       const title = name ? `MoonCat #${idx}: ${name}` : `MoonCat #${idx}: ${hex}`;
       await interaction.editReply({ content: `Wrapped token ID ${tokenId} is Rescue Index #${idx}`, embeds: [{ color: 3447003, title, url: `https://chainstation.mooncatrescue.com/mooncats/${idx}`, image: { url: img } }] });
 
+    } else if (commandName === 'collection') { 
+      /* -------------- collection -------------- */
+      const url = `https://ratemymoon.cat/collection.jpg`;
+      await interaction.editReply(url);
+
+    } else if (commandName === 'citadel') { 
+      /* -------------- citadel -------------- */
+      const url = `https://ratemymoon.cat/citadel.jpg`;
+      await interaction.editReply(url);  
+      
     } else if (commandName === 'floor') {
-      /* -------------- floor -------------- */
-      const slug = 'acclimatedmooncats'; // Official OpenSea slug for MoonCats
-      const url = `https://api.opensea.io/api/v2/collections/${slug}/stats`;
-      try {
-      const response = await fetch(url, {
-        headers: {
-          'Accept': 'application/json',
-          ...(process.env.OPENSEA_API_KEY && { 'X-API-KEY': process.env.OPENSEA_API_KEY })
+      const category = options.getString('category');
+      const slug = 'acclimatedmooncats';
+      const contractAddress = '0xc3f733ca98e0dad0386979eb96fb1722a1a05e69';
+
+      if (!category) {
+        const url = `https://api.opensea.io/api/v2/collections/${slug}/stats`;
+        try {
+          const response = await fetch(url, {
+            headers: {
+              'Accept': 'application/json',
+              ...(process.env.OPENSEA_API_KEY && { 'X-API-KEY': process.env.OPENSEA_API_KEY })
+            }
+          });
+          if (!response.ok) {
+            return await interaction.editReply('⚠️ Could not fetch data from OpenSea.');
+          }
+          const data = await response.json();
+          const floor = data?.total?.floor_price;
+          if (floor != null) {
+            await interaction.editReply(`🏷️ The current floor price of **MoonCats** is **${floor} ETH**.`);
+          } else {
+            await interaction.editReply(`❌ No floor price found for MoonCats.`);
+          }
+        } catch (error) {
+          console.error('Error fetching floor price:', error);
+          await interaction.editReply('❌ An error occurred while fetching the floor price.');
         }
-      });
-      if (!response.ok) {
-        return await interaction.editReply('⚠️ Could not fetch data from OpenSea.');
-      }
-      const data = await response.json();
-      const floor = data?.total?.floor_price;
-      if (floor != null) {
-        await interaction.editReply(`🏷️ The current floor price of **MoonCats** is **${floor} ETH**.`);
-      } else {
-        await interaction.editReply(`❌ No floor price found for MoonCats.`);
-      }
-      } catch (error) {
-        console.error('Error fetching floor price:', error);
-        await interaction.editReply('❌ An error occurred while fetching the floor price.');
+        return;
       }
 
+      const tokenIds = categoryJson[category]?.map(String);
+      if (!tokenIds || tokenIds.length === 0) {
+        return await interaction.editReply(`❌ No MoonCats found for \`${category}\`.`);
+      }
+
+      await interaction.editReply(`🔍 Fetching listings for \`${category}\` MoonCats...`);
+
+      const allListings = [];
+      const batchSize = 30;
+      for (let i = 0; i < tokenIds.length; i += batchSize) {
+        const batch = tokenIds.slice(i, i + batchSize);
+        const url = new URL('https://api.opensea.io/api/v2/orders/ethereum/seaport/listings');
+        url.searchParams.append('asset_contract_address', contractAddress);
+        batch.forEach(id => url.searchParams.append('token_ids', id));
+
+        try {
+          const res = await fetch(url.toString(), {
+            headers: {
+              'Accept': 'application/json',
+              ...(process.env.OPENSEA_API_KEY && { 'X-API-KEY': process.env.OPENSEA_API_KEY })
+            }
+          });
+
+          if (!res.ok) {
+            console.warn(`❗ Failed to fetch batch starting with token ${batch[0]}: ${res.status}`);
+            continue;
+          }
+
+          const data = await res.json();
+          const listings = data.orders || [];
+
+          for (const order of listings) {
+            const considerations = order?.protocol_data?.parameters?.consideration;
+            if (!Array.isArray(considerations) || considerations.length === 0) continue;
+
+            const ethTotal = considerations
+              .filter(c => c.token === '0x0000000000000000000000000000000000000000')
+              .reduce((sum, c) => sum + parseFloat(c.startAmount), 0);
+
+            const ethPrice = ethTotal / 1e18;
+            if (ethPrice <= 0) continue;
+
+            allListings.push(ethPrice);
+
+            const tokenId = order?.maker_asset_bundle?.assets?.[0]?.token_id;
+            console.log(`Token ${tokenId}: ${ethPrice} ETH`);
+          }
+
+          await new Promise(r => setTimeout(r, 300));
+        } catch (err) {
+          console.error(`Error fetching batch starting with token ${batch[0]}:`, err);
+        }
+      }
+
+      if (!allListings.length) {
+        return await interaction.editReply(`❌ No active listings found for \`${category}\`.`);
+      }
+
+      const floor = Math.min(...allListings);
+      await interaction.editReply(`🏷️ Floor price for **${category}** MoonCats: **${floor} ETH** (${allListings.length} listings found).`);
+    
     } else {
       await interaction.editReply('Unknown command.');
     }
