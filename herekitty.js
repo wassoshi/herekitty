@@ -245,41 +245,41 @@ client.on('interactionCreate', async interaction => {
         genesis: '<:genesis_white:938883398032818206>'
       };
       const osUrlMap = {
-        sub100: 'https://opensea.io/collection/acclimatedmooncats?status=all&numericTraits=[{%22traitType%22:%22Rescue+Index%22,%22min%22:0,%22max%22:99}]',
-        day1: 'https://opensea.io/collection/acclimatedmooncats?numericTraits=[{%22traitType%22:%22Rescue+Index%22,%22min%22:0,%22max%22:491}]',
-        week1: 'https://opensea.io/collection/acclimatedmooncats?status=all&numericTraits=[{%22traitType%22:%22Rescue+Index%22,%22min%22:0,%22max%22:1568}]',
-        '2017': 'https://opensea.io/collection/acclimatedmooncats?traits=[{%22traitType%22:%22Rescue+Year%22,%22values%22:[%222017%22]}]',
-        '2018': 'https://opensea.io/collection/acclimatedmooncats?traits=[{%22traitType%22:%22Rescue+Year%22,%22values%22:[%222018%22]}]',
-        '2019': 'https://opensea.io/collection/acclimatedmooncats?traits=[{%22traitType%22:%22Rescue+Year%22,%22values%22:[%222019%22]}]',
-        '2020': 'https://opensea.io/collection/acclimatedmooncats?traits=[{%22traitType%22:%22Rescue+Year%22,%22values%22:[%222020%22]}]',
-        garfield: 'https://opensea.io/collection/acclimatedmooncats?search[resultModel]=ASSETS&search[sortAscending]=true&search[sortBy]=PRICE&traits=[{%22traitType%22:%22Coat+Hue%22,%22values%22:[%22Orange%22]},{%22traitType%22:%22Coat+Pattern%22,%22values%22:[%22Tabby%22]},{%22traitType%22:%22Coat+Saturation%22,%22values%22:[%22Normal%22]}]&numericTraits=[{%22traitType%22:%22Hue%22,%22min%22:20,%22max%22:45}]',
-        cheshire: 'https://opensea.io/collection/acclimatedmooncats?search[resultModel]=ASSETS&search[sortAscending]=true&search[sortBy]=PRICE&traits=[{%22traitType%22:%22Coat+Hue%22,%22values%22:[%22Purple%22,%22Magenta%22]},{%22traitType%22:%22Coat+Pattern%22,%22values%22:[%22Tabby%22]},{%22traitType%22:%22Coat+Saturation%22,%22values%22:[%22Pale%22]}]&numericTraits=[{%22traitType%22:%22Hue%22,%22min%22:265,%22max%22:315}]',
-        pinkpanther: 'https://opensea.io/collection/acclimatedmooncats?search[resultModel]=ASSETS&search[sortAscending]=true&search[sortBy]=PRICE&traits=[{%22traitType%22:%22Coat+Hue%22,%22values%22:[%22Fuchsia%22,%22Red%22]},{%22traitType%22:%22Coat+Pattern%22,%22values%22:[%22Pure%22]},{%22traitType%22:%22Coat+Saturation%22,%22values%22:[%22Pale%22]}]&numericTraits=[{%22traitType%22:%22Hue%22,%22min%22:325,%22max%22:359}]',
-        alien: 'https://opensea.io/collection/acclimatedmooncats?search[resultModel]=ASSETS&search[sortAscending]=true&search[sortBy]=PRICE&traits=[{%22traitType%22:%22Coat+Hue%22,%22values%22:[%22Sky%20Blue%22,%22Blue%22]},{%22traitType%22:%22Coat+Pattern%22,%22values%22:[%22Pure%22]},{%22traitType%22:%22Coat+Saturation%22,%22values%22:[%22Pale%22]}]&numericTraits=[{%22traitType%22:%22Hue%22,%22min%22:195,%22max%22:235}]',
-        zombie: 'https://opensea.io/collection/acclimatedmooncats?search[resultModel]=ASSETS&search[sortAscending]=true&search[sortBy]=PRICE&traits=[{%22traitType%22:%22Coat+Hue%22,%22values%22:[%22Green%22,%22Teal%22]},{%22traitType%22:%22Coat+Pattern%22,%22values%22:[%22Pure%22]},{%22traitType%22:%22Coat+Saturation%22,%22values%22:[%22Pale%22]}]&numericTraits=[{%22traitType%22:%22Hue%22,%22min%22:115,%22max%22:165}]',
-        simba: 'https://opensea.io/collection/acclimatedmooncats?search[resultModel]=ASSETS&search[sortAscending]=true&search[sortBy]=PRICE&traits=[{%22traitType%22:%22Coat+Hue%22,%22values%22:[%22Orange%22]},{%22traitType%22:%22Coat+Pattern%22,%22values%22:[%22Pure%22]},{%22traitType%22:%22Coat+Saturation%22,%22values%22:[%22Normal%22]}]&numericTraits=[{%22traitType%22:%22Hue%22,%22min%22:20,%22max%22:45}]',
-        golden: 'https://opensea.io/collection/acclimatedmooncats?search[resultModel]=ASSETS&search[sortAscending]=true&search[sortBy]=PRICE&traits=[{%22traitType%22:%22Coat+Hue%22,%22values%22:[%22Yellow%22]},{%22traitType%22:%22Coat+Pattern%22,%22values%22:[%22Pure%22]},{%22traitType%22:%22Coat+Saturation%22,%22values%22:[%22Normal%22]}]&numericTraits=[{%22traitType%22:%22Hue%22,%22min%22:46,%22max%22:58}]',
-        pikachu: 'https://opensea.io/collection/acclimatedmooncats?search[resultModel]=ASSETS&search[sortAscending]=true&search[sortBy]=PRICE&traits=[{%22traitType%22:%22Coat+Hue%22,%22values%22:[%22Yellow%22]},{%22traitType%22:%22Coat+Pattern%22,%22values%22:[%22Tabby%22]},{%22traitType%22:%22Coat+Saturation%22,%22values%22:[%22Normal%22]}]&numericTraits=[{%22traitType%22:%22Hue%22,%22min%22:50,%22max%22:60}]',
-        genesis: 'https://opensea.io/collection/acclimatedmooncats?status=all&traits=[{%22traitType%22:%22Classification%22,%22values%22:[%22Genesis%22]}]'
+        sub100: 'https://opensea.io/collection/acclimatedmooncats?numericTraits=[{"traitType":"Rescue+Index","min":0,"max":99}]',
+        day1: 'https://opensea.io/collection/acclimatedmooncats?numericTraits=[{"traitType":"Rescue+Index","min":0,"max":491}]',
+        week1: 'https://opensea.io/collection/acclimatedmooncats?numericTraits=[{"traitType":"Rescue+Index","min":0,"max":1568}]',
+        '2017': 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Rescue+Year","values":["2017"]}]',
+        '2018': 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Rescue+Year","values":["2018"]}]',
+        '2019': 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Rescue+Year","values":["2019"]}]',
+        '2020': 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Rescue+Year","values":["2020"]}]',
+        garfield: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Pattern","values":["Tabby"]},{"traitType":"Coat+Saturation","values":["Normal"]}]&numericTraits=[{"traitType":"Hue","min":20,"max":45}]',
+        cheshire: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Pattern","values":["Tabby"]},{"traitType":"Coat+Saturation","values":["Pale"]}]&numericTraits=[{"traitType":"Hue","min":265,"max":315}]',
+        pinkpanther: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Pattern","values":["Pure"]},{"traitType":"Coat+Saturation","values":["Pale"]}]&numericTraits=[{"traitType":"Hue","min":325,"max":359}]',
+        alien: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Pattern","values":["Pure"]},{"traitType":"Coat+Saturation","values":["Pale"]}]&numericTraits=[{"traitType":"Hue","min":195,"max":235}]',
+        zombie: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Pattern","values":["Pure"]},{"traitType":"Coat+Saturation","values":["Pale"]}]&numericTraits=[{"traitType":"Hue","min":115,"max":165}]',
+        simba: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Pattern","values":["Pure"]},{"traitType":"Coat+Saturation","values":["Normal"]}]&numericTraits=[{"traitType":"Hue","min":20,"max":45}]',
+        golden: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Pattern","values":["Pure"]},{"traitType":"Coat+Saturation","values":["Normal"]}]&numericTraits=[{"traitType":"Hue","min":46,"max":58}]',
+        pikachu: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Pattern","values":["Tabby"]},{"traitType":"Coat+Saturation","values":["Normal"]}]&numericTraits=[{"traitType":"Hue","min":50,"max":60}]',
+        genesis: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Classification","values":["Genesis"]}]'
       };
-      const blurUrlMap = {
+      /*const blurUrlMap = {
         sub100: 'https://blur.io/collection/acclimatedmooncats',
         day1: 'https://blur.io/collection/acclimatedmooncats',
         week1: 'https://blur.io/collection/acclimatedmooncats',
-        '2017': 'https://blur.io/collection/acclimatedmooncats?traits=%7B%22Rescue%20Year%22%3A%5B%222017%22%5D%7D',
-        '2018': 'https://blur.io/collection/acclimatedmooncats?traits=%7B%22Rescue%20Year%22%3A%5B%222018%22%5D%7D',
-        '2019': 'https://blur.io/collection/acclimatedmooncats?traits=%7B%22Rescue%20Year%22%3A%5B%222019%22%5D%7D',
-        '2020': 'https://blur.io/collection/acclimatedmooncats?traits=%7B%22Rescue%20Year%22%3A%5B%222020%22%5D%7D',
-        garfield: 'https://blur.io/collection/acclimatedmooncats?traits={%22Hue%22:[%2220%22,%2221%22,%2222%22,%2223%22,%2224%22,%2225%22,%2226%22,%2227%22,%2228%22,%2229%22,%2230%22,%2231%22,%2232%22,%2233%22,%2234%22,%2235%22,%2236%22,%2237%22,%2238%22,%2239%22,%2240%22,%2241%22,%2242%22,%2243%22,%2244%22,%2245%22],%22Coat+Hue%22:[%22Orange%22],%22Coat+Pattern%22:[%22Tabby%22],%22Coat+Saturation%22:[%22Normal%22]}',
-        cheshire: 'https://blur.io/collection/acclimatedmooncats?traits={%22Hue%22:[%22265%22,%22266%22,%22267%22,%22268%22,%22269%22,%22270%22,%22271%22,%22272%22,%22273%22,%22274%22,%22275%22,%22276%22,%22277%22,%22278%22,%22279%22,%22280%22,%22281%22,%22282%22,%22283%22,%22284%22,%22285%22,%22286%22,%22287%22,%22288%22,%22289%22,%22290%22,%22291%22,%22292%22,%22293%22,%22294%22,%22295%22,%22296%22,%22297%22,%22298%22,%22299%22,%22300%22,%22301%22,%22302%22,%22303%22,%22304%22,%22305%22,%22306%22,%22307%22,%22308%22,%22309%22,%22310%22,%22311%22,%22312%22,%22313%22,%22314%22,%22315%22],%22Coat+Hue%22:[%22Purple%22,%22Magenta%22],%22Coat+Pattern%22:[%22Tabby%22],%22Coat+Saturation%22:[%22Pale%22]}',
-        pinkpanther: 'https://blur.io/collection/acclimatedmooncats?traits={%22Hue%22:[%22325%22,%22326%22,%22327%22,%22328%22,%22329%22,%22330%22,%22331%22,%22332%22,%22333%22,%22334%22,%22335%22,%22336%22,%22337%22,%22338%22,%22339%22,%22340%22,%22341%22,%22342%22,%22343%22,%22344%22,%22345%22,%22346%22,%22347%22,%22348%22,%22349%22,%22350%22,%22351%22,%22352%22,%22353%22,%22354%22,%22355%22,%22356%22,%22357%22,%22358%22,%22359%22,%220%22,%221%22,%222%22,%223%22,%224%22,%225%22,%226%22,%227%22,%228%22,%229%22,%2210%22],%22Coat+Hue%22:[%22Fuchsia%22,%22Red%22],%22Coat+Pattern%22:[%22Pure%22],%22Coat+Saturation%22:[%22Pale%22]}',
-        alien: 'https://blur.io/collection/acclimatedmooncats?traits={%22Hue%22:[%22195%22,%22196%22,%22197%22,%22198%22,%22199%22,%22200%22,%22201%22,%22202%22,%22203%22,%22204%22,%22205%22,%22206%22,%22207%22,%22208%22,%22209%22,%22210%22,%22211%22,%22212%22,%22213%22,%22214%22,%22215%22,%22216%22,%22217%22,%22218%22,%22219%22,%22220%22,%22221%22,%22222%22,%22223%22,%22224%22,%22225%22,%22226%22,%22227%22,%22228%22,%22229%22,%22230%22,%22231%22,%22232%22,%22233%22,%22234%22,%22235%22],%22Coat+Hue%22:[%22Sky%20Blue%22,%22Blue%22],%22Coat+Pattern%22:[%22Pure%22],%22Coat+Saturation%22:[%22Pale%22]}',
-        zombie: 'https://blur.io/collection/acclimatedmooncats?traits={%22Hue%22:[%22115%22,%22116%22,%22117%22,%22118%22,%22119%22,%22120%22,%22121%22,%22122%22,%22123%22,%22124%22,%22125%22,%22126%22,%22127%22,%22128%22,%22129%22,%22130%22,%22131%22,%22132%22,%22133%22,%22134%22,%22135%22,%22136%22,%22137%22,%22138%22,%22139%22,%22140%22,%22141%22,%22142%22,%22143%22,%22144%22,%22145%22,%22146%22,%22147%22,%22148%22,%22149%22,%22150%22,%22151%22,%22152%22,%22153%22,%22154%22,%22155%22,%22156%22,%22157%22,%22158%22,%22159%22,%22160%22,%22161%22,%22162%22,%22163%22,%22164%22,%22165%22],%22Coat+Hue%22:[%22Green%22,%22Teal%22],%22Coat+Pattern%22:[%22Pure%22],%22Coat+Saturation%22:[%22Pale%22]}',
-        simba: 'https://blur.io/collection/acclimatedmooncats?traits={%22Hue%22:[%2220%22,%2221%22,%2222%22,%2223%22,%2224%22,%2225%22,%2226%22,%2227%22,%2228%22,%2229%22,%2230%22,%2231%22,%2232%22,%2233%22,%2234%22,%2235%22,%2236%22,%2237%22,%2238%22,%2239%22,%2240%22,%2241%22,%2242%22,%2243%22,%2244%22,%2245%22],%22Coat+Hue%22:[%22Orange%22],%22Coat+Pattern%22:[%22Pure%22],%22Coat+Saturation%22:[%22Normal%22]}',
-        golden: 'https://blur.io/collection/acclimatedmooncats?traits={%22Hue%22:[%2246%22,%2247%22,%2248%22,%2249%22,%2250%22,%2251%22,%2252%22,%2253%22,%2254%22,%2255%22,%2256%22,%2257%22,%2258%22],%22Coat+Hue%22:[%22Yellow%22],%22Coat+Pattern%22:[%22Pure%22],%22Coat+Saturation%22:[%22Normal%22]}',
-        pikachu: 'https://blur.io/collection/acclimatedmooncats?traits={%22Hue%22:[%2250%22,%2251%22,%2252%22,%2253%22,%2254%22,%2255%22,%2256%22,%2257%22,%2258%22,%2259%22,%2260%22],%22Coat+Hue%22:[%22Yellow%22],%22Coat+Pattern%22:[%22Tabby%22],%22Coat+Saturation%22:[%22Normal%22]}',
-        genesis: 'https://blur.io/collection/acclimatedmooncats?traits=%7B%22Classification%22%3A%5B%22Genesis%22%5D%7D'
-      };
+        '2017': 'https://blur.io/collection/acclimatedmooncats?traits={"Rescue Year":["2017"]}',
+        '2018': 'https://blur.io/collection/acclimatedmooncats?traits={"Rescue Year":["2018"]}',
+        '2019': 'https://blur.io/collection/acclimatedmooncats?traits={"Rescue Year":["2019"]}',
+        '2020': 'https://blur.io/collection/acclimatedmooncats?traits={"Rescue Year":["2020"]}',
+        garfield: 'https://blur.io/collection/acclimatedmooncats?traits={"Hue":["20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45"],"Coat Pattern":["Tabby"],"Coat Saturation":["Normal"]}',
+        cheshire: 'https://blur.io/collection/acclimatedmooncats?traits={"Hue":["265","270","275","280","285","290","295","300","305","310","315"],"Coat Pattern":["Tabby"],"Coat Saturation":["Pale"]}',
+        pinkpanther: 'https://blur.io/collection/acclimatedmooncats?traits={"Hue":["325","330","335","340","345","350","355","0","5","10"],"Coat Pattern":["Pure"],"Coat Saturation":["Pale"]}',
+        alien: 'https://blur.io/collection/acclimatedmooncats?traits={"Hue":["195","200","205","210","215","220","225","230","235"],"Coat Pattern":["Pure"],"Coat Saturation":["Pale"]}',
+        zombie: 'https://blur.io/collection/acclimatedmooncats?traits={"Hue":["115","120","125","130","135","140","145","150","155","160","165"],"Coat Pattern":["Pure"],"Coat Saturation":["Pale"]}',
+        simba: 'https://blur.io/collection/acclimatedmooncats?traits={"Hue":["20","25","30","35","40","45"],"Coat Pattern":["Pure"],"Coat Saturation":["Normal"]}',
+        golden: 'https://blur.io/collection/acclimatedmooncats?traits={"Hue":["46","48","50","52","54","56","58"],"Coat Pattern":["Pure"],"Coat Saturation":["Normal"]}',
+        pikachu: 'https://blur.io/collection/acclimatedmooncats?traits={"Hue":["50","52","54","56","58","60"],"Coat Pattern":["Tabby"],"Coat Saturation":["Normal"]}',
+        genesis: 'https://blur.io/collection/acclimatedmooncats?traits={"Classification":["Genesis"]}'
+      };*/
 
       if (!category) {
         const url = `https://api.opensea.io/api/v2/collections/${slug}/stats`;
@@ -369,17 +369,17 @@ client.on('interactionCreate', async interaction => {
       const emoji = emojiMap[category] || '';
       const emoji2 = emojiMap2[category] || '';
       const osUrl = osUrlMap[category] || '';
-      const blurUrl = blurUrlMap[category] || '';
+      //const blurUrl = blurUrlMap[category] || '';
       const row = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
           .setLabel('opensea')
           .setStyle(ButtonStyle.Link)
-          .setURL(osUrl),
+          .setURL(osUrl)
       
-        new ButtonBuilder()
-          .setLabel('blur')
-          .setStyle(ButtonStyle.Link)
-          .setURL(blurUrl)
+        //new ButtonBuilder()
+        //  .setLabel('blur')
+        //  .setStyle(ButtonStyle.Link)
+        //  .setURL(blurUrl)
       );
       await interaction.editReply({content: `${emoji} **${category}** MoonCats: **${floor.toFixed(2)} E** (${allListings.length} listed) ${emoji2}`, components: [row],});
     
