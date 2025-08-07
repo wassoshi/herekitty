@@ -226,7 +226,6 @@ client.on('interactionCreate', async interaction => {
         pikachu: '<:character_pika_smiling:1138628582780960768>',
         genesis: '<:genesis_black:1166065497679335524>'
       };
-
       const emojiMap2 = {
         sub100: '<:hue_180_cyan_tortie:1138566375334481960>',
         day1: '<:hue_180_cyan_tortie:1138566375334481960>',
@@ -245,7 +244,6 @@ client.on('interactionCreate', async interaction => {
         pikachu: '<a:pikahi:1400214842492850336>',
         genesis: '<:genesis_white:938883398032818206>'
       };
-
       const osUrlMap = {
         sub100: 'https://opensea.io/collection/acclimatedmooncats?status=all&numericTraits=[{%22traitType%22:%22Rescue+Index%22,%22min%22:0,%22max%22:99}]',
         day1: 'https://opensea.io/collection/acclimatedmooncats?numericTraits=[{%22traitType%22:%22Rescue+Index%22,%22min%22:0,%22max%22:491}]',
@@ -264,7 +262,6 @@ client.on('interactionCreate', async interaction => {
         pikachu: 'https://opensea.io/collection/acclimatedmooncats?search[resultModel]=ASSETS&search[sortAscending]=true&search[sortBy]=PRICE&traits=[{%22traitType%22:%22Coat+Hue%22,%22values%22:[%22Yellow%22]},{%22traitType%22:%22Coat+Pattern%22,%22values%22:[%22Tabby%22]},{%22traitType%22:%22Coat+Saturation%22,%22values%22:[%22Normal%22]}]&numericTraits=[{%22traitType%22:%22Hue%22,%22min%22:50,%22max%22:60}]',
         genesis: 'https://opensea.io/collection/acclimatedmooncats?status=all&traits=[{%22traitType%22:%22Classification%22,%22values%22:[%22Genesis%22]}]'
       };
-
       const blurUrlMap = {
         sub100: 'https://blur.io/collection/acclimatedmooncats',
         day1: 'https://blur.io/collection/acclimatedmooncats',
@@ -299,7 +296,7 @@ client.on('interactionCreate', async interaction => {
           const data = await response.json();
           const floor = data?.total?.floor_price;
           if (floor != null) {
-            await interaction.editReply(`<a:mooncats:939489975819464714> Floor price of MoonCats is **${floor} ETH**. <a:mooncatbotpfp:1290340466449055825>`);
+            await interaction.editReply(`<a:mooncats:939489975819464714> Floor price of MoonCats is **${floor} E**. <a:mooncatbotpfp:1290340466449055825>`);
           } else {
             await interaction.editReply(`❌ No floor price found for MoonCats.`);
           }
@@ -384,7 +381,7 @@ client.on('interactionCreate', async interaction => {
           .setStyle(ButtonStyle.Link)
           .setURL(blurUrl)
       );
-      await interaction.editReply({content: `${emoji} Floor price of **${category}** MoonCats: **${floor} ETH** (${allListings.length} listings found). ${emoji2}`, components: [row],});
+      await interaction.editReply({content: `${emoji} **${category}** MoonCats: **${floor} E** (${allListings.length} listed) ${emoji2}`, components: [row],});
     
     } else {
       await interaction.editReply('Unknown command.');
