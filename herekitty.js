@@ -296,7 +296,7 @@ client.on('interactionCreate', async interaction => {
           const data = await response.json();
           const floor = data?.total?.floor_price;
           if (floor != null) {
-            await interaction.editReply(`<a:mooncats:939489975819464714> Floor price of MoonCats is **${floor} E**. <a:mooncatbotpfp:1290340466449055825>`);
+            await interaction.editReply(`<a:mooncats:939489975819464714> Floor price of MoonCats is **${floor.toFixed(2)} E**. <a:mooncatbotpfp:1290340466449055825>`);
           } else {
             await interaction.editReply(`❌ No floor price found for MoonCats.`);
           }
@@ -381,7 +381,7 @@ client.on('interactionCreate', async interaction => {
           .setStyle(ButtonStyle.Link)
           .setURL(blurUrl)
       );
-      await interaction.editReply({content: `${emoji} **${category}** MoonCats: **${floor} E** (${allListings.length} listed) ${emoji2}`, components: [row],});
+      await interaction.editReply({content: `${emoji} **${category}** MoonCats: **${floor.toFixed(2)} E** (${allListings.length} listed) ${emoji2}`, components: [row],});
     
     } else {
       await interaction.editReply('Unknown command.');
