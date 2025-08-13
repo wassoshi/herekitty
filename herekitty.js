@@ -252,34 +252,16 @@ client.on('interactionCreate', async interaction => {
         '2018': 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Rescue+Year","values":["2018"]}]',
         '2019': 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Rescue+Year","values":["2019"]}]',
         '2020': 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Rescue+Year","values":["2020"]}]',
-        garfield: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Pattern","values":["Tabby"]},{"traitType":"Coat+Saturation","values":["Normal"]}]&numericTraits=[{"traitType":"Hue","min":20,"max":45}]',
-        cheshire: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Pattern","values":["Tabby"]},{"traitType":"Coat+Saturation","values":["Pale"]}]&numericTraits=[{"traitType":"Hue","min":265,"max":315}]',
-        pinkpanther: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Pattern","values":["Pure"]},{"traitType":"Coat+Saturation","values":["Pale"]}]&numericTraits=[{"traitType":"Hue","min":325,"max":359}]',
-        alien: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Pattern","values":["Pure"]},{"traitType":"Coat+Saturation","values":["Pale"]}]&numericTraits=[{"traitType":"Hue","min":195,"max":235}]',
-        zombie: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Pattern","values":["Pure"]},{"traitType":"Coat+Saturation","values":["Pale"]}]&numericTraits=[{"traitType":"Hue","min":115,"max":165}]',
+        garfield: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Hue","values":["Orange"]},{"traitType":"Coat+Pattern","values":["Tabby"]},{"traitType":"Coat+Saturation","values":["Normal"]},{"traitType":"Expression","values":["Smiling","Pouting","Grumpy"]}]&numericTraits=[{"traitType":"Hue","min":25,"max":40}]',
+        cheshire: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Hue","values":["Purple","Magenta"]},{"traitType":"Coat+Pattern","values":["Tabby"]},{"traitType":"Coat+Saturation","values":["Pale"]},{"traitType":"Expression","values":["Smiling"]}]&numericTraits=[{"traitType":"Hue","min":275,"max":305}]',
+        pinkpanther: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Hue","values":["Fuchsia","Red"]},{"traitType":"Coat+Pattern","values":["Pure"]},{"traitType":"Coat+Saturation","values":["Pale"]}]&numericTraits=[{"traitType":"Hue","min":335,"max":359}]',
+        alien: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Hue","values":["Sky+Blue"]},{"traitType":"Coat+Pattern","values":["Pure"]},{"traitType":"Coat+Saturation","values":["Pale"]}]&numericTraits=[{"traitType":"Hue","min":205,"max":225}]',
+        zombie: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Hue","values":["Green","Teal"]},{"traitType":"Coat+Pattern","values":["Pure"]},{"traitType":"Coat+Saturation","values":["Pale"]}]&numericTraits=[{"traitType":"Hue","min":125,"max":155}]',
         simba: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Pattern","values":["Pure"]},{"traitType":"Coat+Saturation","values":["Normal"]}]&numericTraits=[{"traitType":"Hue","min":20,"max":45}]',
         golden: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Pattern","values":["Pure"]},{"traitType":"Coat+Saturation","values":["Normal"]}]&numericTraits=[{"traitType":"Hue","min":46,"max":58}]',
         pikachu: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Pattern","values":["Tabby"]},{"traitType":"Coat+Saturation","values":["Normal"]}]&numericTraits=[{"traitType":"Hue","min":50,"max":60}]',
         genesis: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Classification","values":["Genesis"]}]'
       };
-      /*const blurUrlMap = {
-        sub100: 'https://blur.io/collection/acclimatedmooncats',
-        day1: 'https://blur.io/collection/acclimatedmooncats',
-        week1: 'https://blur.io/collection/acclimatedmooncats',
-        '2017': 'https://blur.io/collection/acclimatedmooncats?traits={"Rescue Year":["2017"]}',
-        '2018': 'https://blur.io/collection/acclimatedmooncats?traits={"Rescue Year":["2018"]}',
-        '2019': 'https://blur.io/collection/acclimatedmooncats?traits={"Rescue Year":["2019"]}',
-        '2020': 'https://blur.io/collection/acclimatedmooncats?traits={"Rescue Year":["2020"]}',
-        garfield: 'https://blur.io/collection/acclimatedmooncats?traits={"Hue":["20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45"],"Coat Pattern":["Tabby"],"Coat Saturation":["Normal"]}',
-        cheshire: 'https://blur.io/collection/acclimatedmooncats?traits={"Hue":["265","270","275","280","285","290","295","300","305","310","315"],"Coat Pattern":["Tabby"],"Coat Saturation":["Pale"]}',
-        pinkpanther: 'https://blur.io/collection/acclimatedmooncats?traits={"Hue":["325","330","335","340","345","350","355","0","5","10"],"Coat Pattern":["Pure"],"Coat Saturation":["Pale"]}',
-        alien: 'https://blur.io/collection/acclimatedmooncats?traits={"Hue":["195","200","205","210","215","220","225","230","235"],"Coat Pattern":["Pure"],"Coat Saturation":["Pale"]}',
-        zombie: 'https://blur.io/collection/acclimatedmooncats?traits={"Hue":["115","120","125","130","135","140","145","150","155","160","165"],"Coat Pattern":["Pure"],"Coat Saturation":["Pale"]}',
-        simba: 'https://blur.io/collection/acclimatedmooncats?traits={"Hue":["20","25","30","35","40","45"],"Coat Pattern":["Pure"],"Coat Saturation":["Normal"]}',
-        golden: 'https://blur.io/collection/acclimatedmooncats?traits={"Hue":["46","48","50","52","54","56","58"],"Coat Pattern":["Pure"],"Coat Saturation":["Normal"]}',
-        pikachu: 'https://blur.io/collection/acclimatedmooncats?traits={"Hue":["50","52","54","56","58","60"],"Coat Pattern":["Tabby"],"Coat Saturation":["Normal"]}',
-        genesis: 'https://blur.io/collection/acclimatedmooncats?traits={"Classification":["Genesis"]}'
-      };*/
 
       if (!category) {
         const url = `https://api.opensea.io/api/v2/collections/${slug}/stats`;
@@ -314,14 +296,49 @@ client.on('interactionCreate', async interaction => {
 
       await interaction.editReply(`🔍 Fetching listings for \`${category}\` MoonCats...`);
 
-      const allListings = [];
+      // Helper function for parallel processing with concurrency limit
+      async function processBatchesWithLimit(items, batchSize, concurrencyLimit, processFunction) {
+        const batches = [];
+        for (let i = 0; i < items.length; i += batchSize) {
+          batches.push(items.slice(i, i + batchSize));
+        }
+
+        const results = [];
+        const executing = new Set();
+
+        async function executeBatch(batch) {
+          try {
+            const result = await processFunction(batch);
+            results.push(...result);
+          } catch (error) {
+            console.error(`Error processing batch:`, error);
+          } finally {
+            executing.delete(batch);
+          }
+        }
+
+        // Process batches with concurrency limit
+        while (batches.length > 0 || executing.size > 0) {
+          while (executing.size < concurrencyLimit && batches.length > 0) {
+            const batch = batches.shift();
+            executing.add(batch);
+            executeBatch(batch);
+          }
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+
+        return results;
+      }
+
       const batchSize = 30;
-      for (let i = 0; i < tokenIds.length; i += batchSize) {
-        const batch = tokenIds.slice(i, i + batchSize);
+      const concurrencyLimit = 3; // Adjust this value based on rate limits
+
+      const processOpenSeaBatch = async (batch) => {
         const url = new URL('https://api.opensea.io/api/v2/orders/ethereum/seaport/listings');
         url.searchParams.append('asset_contract_address', contractAddress);
         batch.forEach(id => url.searchParams.append('token_ids', id));
 
+        const listings = [];
         try {
           const res = await fetch(url.toString(), {
             headers: {
@@ -331,14 +348,12 @@ client.on('interactionCreate', async interaction => {
           });
 
           if (!res.ok) {
-            console.warn(`❗ Failed to fetch batch starting with token ${batch[0]}: ${res.status}`);
-            continue;
+            console.warn(`Failed to fetch batch: ${res.status}`);
+            return listings;
           }
 
           const data = await res.json();
-          const listings = data.orders || [];
-
-          for (const order of listings) {
+          for (const order of data.orders || []) {
             const considerations = order?.protocol_data?.parameters?.consideration;
             if (!Array.isArray(considerations) || considerations.length === 0) continue;
 
@@ -349,17 +364,26 @@ client.on('interactionCreate', async interaction => {
             const ethPrice = ethTotal / 1e18;
             if (ethPrice <= 0) continue;
 
-            allListings.push(ethPrice);
+            listings.push(ethPrice);
 
             const tokenId = order?.maker_asset_bundle?.assets?.[0]?.token_id;
             console.log(`Token ${tokenId}: ${ethPrice} ETH`);
           }
 
-          await new Promise(r => setTimeout(r, 300));
+          await new Promise(r => setTimeout(r, 300)); // Rate limit delay
+          return listings;
         } catch (err) {
-          console.error(`Error fetching batch starting with token ${batch[0]}:`, err);
+          console.error(`Error fetching batch:`, err);
+          return listings;
         }
-      }
+      };
+
+      const allListings = await processBatchesWithLimit(
+        tokenIds,
+        batchSize,
+        concurrencyLimit,
+        processOpenSeaBatch
+      );
 
       if (!allListings.length) {
         return await interaction.editReply(`❌ No active listings found for \`${category}\`.`);
@@ -369,17 +393,11 @@ client.on('interactionCreate', async interaction => {
       const emoji = emojiMap[category] || '';
       const emoji2 = emojiMap2[category] || '';
       const osUrl = osUrlMap[category] || '';
-      //const blurUrl = blurUrlMap[category] || '';
       const row = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
           .setLabel('opensea')
           .setStyle(ButtonStyle.Link)
           .setURL(osUrl)
-      
-        //new ButtonBuilder()
-        //  .setLabel('blur')
-        //  .setStyle(ButtonStyle.Link)
-        //  .setURL(blurUrl)
       );
       await interaction.editReply({content: `${emoji} **${category}** MoonCats: **${floor.toFixed(2)} E** (${allListings.length} listed) ${emoji2}`, components: [row],});
     
