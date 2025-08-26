@@ -337,40 +337,60 @@ client.on('interactionCreate', async interaction => {
         const url = new URL('https://api.opensea.io/api/v2/orders/ethereum/seaport/listings');
         url.searchParams.append('asset_contract_address', contractAddress);
         batch.forEach(id => url.searchParams.append('token_ids', id));
+        url.searchParams.append('limit', '50');
+        url.searchParams.append('order_by', 'created_date');
+        url.searchParams.append('order_direction', 'desc');
 
+        const seenTokens = new Set();
         const listings = [];
+
         try {
-          const res = await fetch(url.toString(), {
-            headers: {
-              'Accept': 'application/json',
-              ...(process.env.OPENSEA_API_KEY && { 'X-API-KEY': process.env.OPENSEA_API_KEY })
+          let hasMore = true;
+          let cursor = null;
+
+          while (hasMore) {
+            if (cursor) {
+              url.searchParams.set('cursor', cursor);
             }
-          });
 
-          if (!res.ok) {
-            console.warn(`Failed to fetch batch: ${res.status}`);
-            return listings;
+            const res = await fetch(url.toString(), {
+              headers: {
+                'Accept': 'application/json',
+                ...(process.env.OPENSEA_API_KEY && { 'X-API-KEY': process.env.OPENSEA_API_KEY })
+              }
+            });
+
+            if (!res.ok) {
+              console.warn(`Failed to fetch batch: ${res.status}`);
+              break;
+            }
+
+            const data = await res.json();
+            
+            for (const order of data.orders || []) {
+              const tokenId = order?.maker_asset_bundle?.assets?.[0]?.token_id;
+              
+              if (seenTokens.has(tokenId)) continue;
+              seenTokens.add(tokenId);
+
+              const priceWeiStr = order?.current_price;
+              if (!priceWeiStr) continue;
+
+              const ethPrice = Number(priceWeiStr) / 1e18;
+              if (ethPrice <= 0) continue;
+
+              listings.push(ethPrice);
+              console.log(`Token ${tokenId}: ${ethPrice.toFixed(2)} ETH`);
+            }
+
+            cursor = data.next;
+            hasMore = Boolean(cursor);
+
+            if (hasMore) {
+              await new Promise(r => setTimeout(r, 300));
+            }
           }
 
-          const data = await res.json();
-          for (const order of data.orders || []) {
-            const considerations = order?.protocol_data?.parameters?.consideration;
-            if (!Array.isArray(considerations) || considerations.length === 0) continue;
-
-            const ethTotal = considerations
-              .filter(c => c.token === '0x0000000000000000000000000000000000000000')
-              .reduce((sum, c) => sum + parseFloat(c.startAmount), 0);
-
-            const ethPrice = ethTotal / 1e18;
-            if (ethPrice <= 0) continue;
-
-            listings.push(ethPrice);
-
-            const tokenId = order?.maker_asset_bundle?.assets?.[0]?.token_id;
-            console.log(`Token ${tokenId}: ${ethPrice} ETH`);
-          }
-
-          await new Promise(r => setTimeout(r, 300)); // Rate limit delay
           return listings;
         } catch (err) {
           console.error(`Error fetching batch:`, err);
@@ -400,7 +420,7 @@ client.on('interactionCreate', async interaction => {
           .setURL(osUrl)
       );
       await interaction.editReply({content: `${emoji} **${category}** MoonCats: **${floor.toFixed(2)} E** (${allListings.length} listed) ${emoji2}`, components: [row],});
-    
+
     } else {
       await interaction.editReply('Unknown command.');
     }
