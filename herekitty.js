@@ -278,7 +278,7 @@ client.on('interactionCreate', async interaction => {
           const data = await response.json();
           const floor = data?.total?.floor_price;
           if (floor != null) {
-            await interaction.editReply(`<a:mooncats:939489975819464714> Floor price of MoonCats is **${floor.toFixed(2)} E**. <a:mooncatbotpfp:1290340466449055825>`);
+            await interaction.editReply(`<a:mooncats:939489975819464714> Floor price of MoonCats is **${floor.toFixed(2)} E**`);
           } else {
             await interaction.editReply(`❌ No floor price found for MoonCats.`);
           }
