@@ -11,6 +11,75 @@ dotenv.config();
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
+const OPENSEA_SLUG = 'acclimatedmooncats';
+const OPENSEA_LISTINGS_CACHE_TTL_MS = 5 * 60_000;
+const openSeaListingsCache = { expiresAt: 0, result: null };
+
+const floorExactTraitMap = {
+  '2017': [{ traitType: 'Rescue Year', value: '2017' }],
+  '2018': [{ traitType: 'Rescue Year', value: '2018' }],
+  '2019': [{ traitType: 'Rescue Year', value: '2019' }],
+  '2020': [{ traitType: 'Rescue Year', value: '2020' }],
+  genesis: [{ traitType: 'Classification', value: 'Genesis' }]
+};
+
+const floorEmojiMap = {
+  sub100: '<:hue_240_blue_pure:1138567084234788994>',
+  day1: '<:hue_240_blue_pure:1138567084234788994>',
+  week1: '<:hue_240_blue_pure:1138567084234788994>',
+  '2017': '<:hue_270_purple_tabby:1138567535550279832>',
+  '2018': '<:hue_000_red_tortie:1138528166059716650>',
+  '2019': '<:hue_120_green_spotted:1138546767739232276>',
+  '2020': '<:hue_180_cyan_tortie:1138566375334481960>',
+  garfield: '<:character_garfield_grumpy:938880748751061043>',
+  cheshire: '<:character_cheshire:938882483733278790>',
+  pinkpanther: '<:character_pink_panther:939083117451436072>',
+  alien: '<:character_alien_shy:938881921981755494>',
+  zombie: '<:character_zombie_pouting:938882752684630087>',
+  simba: '<:character_simba_shy:1138627065822842890>',
+  golden: '<:character_gold_shy:1138612059249049610>',
+  pikachu: '<:character_pika_smiling:1138628582780960768>',
+  genesis: '<:genesis_black:1166065497679335524>'
+};
+
+const floorEmojiMap2 = {
+  sub100: '<:hue_180_cyan_tortie:1138566375334481960>',
+  day1: '<:hue_180_cyan_tortie:1138566375334481960>',
+  week1: '<:hue_180_cyan_tortie:1138566375334481960>',
+  '2017': '<:hue_000_red_tortie:1138528166059716650>',
+  '2018': '<:hue_120_green_spotted:1138546767739232276>',
+  '2019': '<:hue_270_purple_tabby:1138567535550279832>',
+  '2020': '<:hue_240_blue_pure:1138567084234788994>',
+  garfield: '<a:character_garf_toes:1145029269681086564>',
+  cheshire: '<a:character_cheshire_roll:1145029265679720498>',
+  pinkpanther: '<a:character_pp_thank:1145029276463280148>',
+  alien: '<a:character_alien_walk_standing_12:1143965778379550861>',
+  zombie: '<a:character_zombie_pouncing_right:1143965944956325999>',
+  simba: '<a:character_simba_walk_standing_12:1143965938694234214>',
+  golden: '<a:character_golden_sleeper_128:1143965856947240971>',
+  pikachu: '<a:pikahi:1400214842492850336>',
+  genesis: '<:genesis_white:938883398032818206>'
+};
+
+const floorOpenSeaUrlMap = {
+  sub100: 'https://opensea.io/collection/acclimatedmooncats?numericTraits=[{"traitType":"Rescue+Index","min":0,"max":99}]',
+  day1: 'https://opensea.io/collection/acclimatedmooncats?numericTraits=[{"traitType":"Rescue+Index","min":0,"max":491}]',
+  week1: 'https://opensea.io/collection/acclimatedmooncats?numericTraits=[{"traitType":"Rescue+Index","min":0,"max":1568}]',
+  '2017': 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Rescue+Year","values":["2017"]}]',
+  '2018': 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Rescue+Year","values":["2018"]}]',
+  '2019': 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Rescue+Year","values":["2019"]}]',
+  '2020': 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Rescue+Year","values":["2020"]}]',
+  garfield: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Hue","values":["Orange"]},{"traitType":"Coat+Pattern","values":["Tabby"]},{"traitType":"Coat+Saturation","values":["Normal"]},{"traitType":"Expression","values":["Smiling","Pouting","Grumpy"]}]&numericTraits=[{"traitType":"Hue","min":25,"max":40}]',
+  cheshire: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Hue","values":["Purple","Magenta"]},{"traitType":"Coat+Pattern","values":["Tabby"]},{"traitType":"Coat+Saturation","values":["Pale"]},{"traitType":"Expression","values":["Smiling"]}]&numericTraits=[{"traitType":"Hue","min":275,"max":305}]',
+  pinkpanther: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Hue","values":["Fuchsia","Red"]},{"traitType":"Coat+Pattern","values":["Pure"]},{"traitType":"Coat+Saturation","values":["Pale"]}]&numericTraits=[{"traitType":"Hue","min":335,"max":359}]',
+  alien: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Hue","values":["Sky+Blue"]},{"traitType":"Coat+Pattern","values":["Pure"]},{"traitType":"Coat+Saturation","values":["Pale"]}]&numericTraits=[{"traitType":"Hue","min":205,"max":225}]',
+  zombie: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Hue","values":["Green","Teal"]},{"traitType":"Coat+Pattern","values":["Pure"]},{"traitType":"Coat+Saturation","values":["Pale"]}]&numericTraits=[{"traitType":"Hue","min":125,"max":155}]',
+  simba: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Pattern","values":["Pure"]},{"traitType":"Coat+Saturation","values":["Normal"]}]&numericTraits=[{"traitType":"Hue","min":20,"max":45}]',
+  golden: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Pattern","values":["Pure"]},{"traitType":"Coat+Saturation","values":["Normal"]}]&numericTraits=[{"traitType":"Hue","min":46,"max":58}]',
+  pikachu: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Pattern","values":["Tabby"]},{"traitType":"Coat+Saturation","values":["Normal"]}]&numericTraits=[{"traitType":"Hue","min":50,"max":60}]',
+  genesis: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Classification","values":["Genesis"]}]'
+};
+
 const commands = [
   new SlashCommandBuilder().setName('mc').setDescription('Fetch details for a specific MoonCat')
     .addStringOption(o => o.setName('identifier').setDescription('The MoonCat rescue index or hex ID').setRequired(true)),
@@ -55,6 +124,143 @@ const commands = [
 ].map(c => c.toJSON());
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
+
+function normalizePriceToWei(value, decimals) {
+  const amount = BigInt(value);
+  if (decimals === 18) return amount;
+  if (decimals < 18) return amount * 10n ** BigInt(18 - decimals);
+  return amount / 10n ** BigInt(decimals - 18);
+}
+
+function formatWeiToEth(wei, fractionDigits = 2) {
+  const divisor = 10n ** 18n;
+  const scale = 10n ** BigInt(fractionDigits);
+  const rounded = (wei * scale + divisor / 2n) / divisor;
+  const whole = rounded / scale;
+  const fraction = (rounded % scale).toString().padStart(fractionDigits, '0');
+  return `${whole}.${fraction}`;
+}
+
+function getListingTokenAndWei(listing) {
+  const tokenId = listing?.protocol_data?.parameters?.offer?.[0]?.identifierOrCriteria;
+  if (!tokenId) return null;
+
+  const price = listing?.price?.current;
+  const decimals = Number(price?.decimals ?? 18);
+  if (!price?.value || !Number.isInteger(decimals) || decimals < 0) return null;
+
+  try {
+    const weiPrice = normalizePriceToWei(price.value, decimals);
+    if (weiPrice <= 0n) return null;
+    return { tokenId, weiPrice };
+  } catch {
+    return null;
+  }
+}
+
+function setBestListingPrice(bestPriceByToken, tokenId, weiPrice) {
+  const currentBest = bestPriceByToken.get(tokenId);
+  if (currentBest == null || weiPrice < currentBest) {
+    bestPriceByToken.set(tokenId, weiPrice);
+  }
+}
+
+async function fetchOpenSeaCollectionListings() {
+  const now = Date.now();
+  if (openSeaListingsCache.result && openSeaListingsCache.expiresAt > now) {
+    return openSeaListingsCache.result;
+  }
+
+  const bestPriceByToken = new Map();
+  let cursor = null;
+  let error = null;
+
+  try {
+    do {
+      const url = new URL(`https://api.opensea.io/api/v2/listings/collection/${OPENSEA_SLUG}/all`);
+      url.searchParams.set('limit', '200');
+      if (cursor) url.searchParams.set('next', cursor);
+
+      const res = await fetch(url.toString(), {
+        headers: {
+          'Accept': 'application/json',
+          ...(process.env.OPENSEA_API_KEY && { 'X-API-KEY': process.env.OPENSEA_API_KEY })
+        }
+      });
+
+      if (!res.ok) {
+        console.warn(`Failed to fetch collection listings: ${res.status} ${res.statusText}`);
+        error = `OpenSea returned ${res.status} ${res.statusText}`;
+        break;
+      }
+
+      const data = await res.json();
+
+      for (const listing of data.listings || []) {
+        const listingPrice = getListingTokenAndWei(listing);
+        if (!listingPrice) continue;
+        setBestListingPrice(bestPriceByToken, listingPrice.tokenId, listingPrice.weiPrice);
+      }
+
+      cursor = data.next || null;
+      if (cursor) await new Promise(r => setTimeout(r, 300));
+    } while (cursor);
+  } catch (err) {
+    console.error('Error fetching collection listings:', err);
+    error = 'OpenSea request failed';
+  }
+
+  const result = { listingsByToken: bestPriceByToken, error };
+  if (!error) {
+    openSeaListingsCache.result = result;
+    openSeaListingsCache.expiresAt = now + OPENSEA_LISTINGS_CACHE_TTL_MS;
+  }
+  return result;
+}
+
+async function fetchOpenSeaBestListingsForTraits(traits) {
+  const bestPriceByToken = new Map();
+  let cursor = null;
+  let error = null;
+
+  try {
+    do {
+      const url = new URL(`https://api.opensea.io/api/v2/listings/collection/${OPENSEA_SLUG}/best`);
+      url.searchParams.set('limit', '200');
+      url.searchParams.set('traits', JSON.stringify(traits));
+      if (cursor) url.searchParams.set('next', cursor);
+
+      const res = await fetch(url.toString(), {
+        headers: {
+          'Accept': 'application/json',
+          ...(process.env.OPENSEA_API_KEY && { 'X-API-KEY': process.env.OPENSEA_API_KEY })
+        }
+      });
+
+      if (!res.ok) {
+        console.warn(`Failed to fetch best listings: ${res.status} ${res.statusText}`);
+        error = `OpenSea returned ${res.status} ${res.statusText}`;
+        break;
+      }
+
+      const data = await res.json();
+
+      for (const listing of data.listings || []) {
+        const listingPrice = getListingTokenAndWei(listing);
+        if (!listingPrice) continue;
+        setBestListingPrice(bestPriceByToken, listingPrice.tokenId, listingPrice.weiPrice);
+      }
+
+      cursor = data.next?.value || data.next || null;
+      if (cursor) await new Promise(r => setTimeout(r, 300));
+    } while (cursor);
+  } catch (err) {
+    console.error('Error fetching best listings:', err);
+    error = 'OpenSea request failed';
+  }
+
+  return { listingsByToken: bestPriceByToken, error };
+}
 
 async function clearOldCommands() {
   try {
@@ -206,65 +412,9 @@ client.on('interactionCreate', async interaction => {
     } else if (commandName === 'floor') {
       /* -------------- floor -------------- */
       const category = options.getString('category');
-      const slug = 'acclimatedmooncats';
-      const contractAddress = '0xc3f733ca98e0dad0386979eb96fb1722a1a05e69';
-      const emojiMap = {
-        sub100: '<:hue_240_blue_pure:1138567084234788994>',
-        day1: '<:hue_240_blue_pure:1138567084234788994>',
-        week1: '<:hue_240_blue_pure:1138567084234788994>',
-        '2017': '<:hue_270_purple_tabby:1138567535550279832>',
-        '2018': '<:hue_000_red_tortie:1138528166059716650>',
-        '2019': '<:hue_120_green_spotted:1138546767739232276>',
-        '2020': '<:hue_180_cyan_tortie:1138566375334481960>',
-        garfield: '<:character_garfield_grumpy:938880748751061043>',
-        cheshire: '<:character_cheshire:938882483733278790>',
-        pinkpanther: '<:character_pink_panther:939083117451436072>',
-        alien: '<:character_alien_shy:938881921981755494>',
-        zombie: '<:character_zombie_pouting:938882752684630087>',
-        simba: '<:character_simba_shy:1138627065822842890>',
-        golden: '<:character_gold_shy:1138612059249049610>',
-        pikachu: '<:character_pika_smiling:1138628582780960768>',
-        genesis: '<:genesis_black:1166065497679335524>'
-      };
-      const emojiMap2 = {
-        sub100: '<:hue_180_cyan_tortie:1138566375334481960>',
-        day1: '<:hue_180_cyan_tortie:1138566375334481960>',
-        week1: '<:hue_180_cyan_tortie:1138566375334481960>',
-        '2017': '<:hue_000_red_tortie:1138528166059716650>',
-        '2018': '<:hue_120_green_spotted:1138546767739232276>',
-        '2019': '<:hue_270_purple_tabby:1138567535550279832>',
-        '2020': '<:hue_240_blue_pure:1138567084234788994>',
-        garfield: '<a:character_garf_toes:1145029269681086564>',
-        cheshire: '<a:character_cheshire_roll:1145029265679720498>',
-        pinkpanther: '<a:character_pp_thank:1145029276463280148>',
-        alien: '<a:character_alien_walk_standing_12:1143965778379550861>',
-        zombie: '<a:character_zombie_pouncing_right:1143965944956325999>',
-        simba: '<a:character_simba_walk_standing_12:1143965938694234214>',
-        golden: '<a:character_golden_sleeper_128:1143965856947240971>',
-        pikachu: '<a:pikahi:1400214842492850336>',
-        genesis: '<:genesis_white:938883398032818206>'
-      };
-      const osUrlMap = {
-        sub100: 'https://opensea.io/collection/acclimatedmooncats?numericTraits=[{"traitType":"Rescue+Index","min":0,"max":99}]',
-        day1: 'https://opensea.io/collection/acclimatedmooncats?numericTraits=[{"traitType":"Rescue+Index","min":0,"max":491}]',
-        week1: 'https://opensea.io/collection/acclimatedmooncats?numericTraits=[{"traitType":"Rescue+Index","min":0,"max":1568}]',
-        '2017': 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Rescue+Year","values":["2017"]}]',
-        '2018': 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Rescue+Year","values":["2018"]}]',
-        '2019': 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Rescue+Year","values":["2019"]}]',
-        '2020': 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Rescue+Year","values":["2020"]}]',
-        garfield: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Hue","values":["Orange"]},{"traitType":"Coat+Pattern","values":["Tabby"]},{"traitType":"Coat+Saturation","values":["Normal"]},{"traitType":"Expression","values":["Smiling","Pouting","Grumpy"]}]&numericTraits=[{"traitType":"Hue","min":25,"max":40}]',
-        cheshire: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Hue","values":["Purple","Magenta"]},{"traitType":"Coat+Pattern","values":["Tabby"]},{"traitType":"Coat+Saturation","values":["Pale"]},{"traitType":"Expression","values":["Smiling"]}]&numericTraits=[{"traitType":"Hue","min":275,"max":305}]',
-        pinkpanther: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Hue","values":["Fuchsia","Red"]},{"traitType":"Coat+Pattern","values":["Pure"]},{"traitType":"Coat+Saturation","values":["Pale"]}]&numericTraits=[{"traitType":"Hue","min":335,"max":359}]',
-        alien: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Hue","values":["Sky+Blue"]},{"traitType":"Coat+Pattern","values":["Pure"]},{"traitType":"Coat+Saturation","values":["Pale"]}]&numericTraits=[{"traitType":"Hue","min":205,"max":225}]',
-        zombie: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Hue","values":["Green","Teal"]},{"traitType":"Coat+Pattern","values":["Pure"]},{"traitType":"Coat+Saturation","values":["Pale"]}]&numericTraits=[{"traitType":"Hue","min":125,"max":155}]',
-        simba: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Pattern","values":["Pure"]},{"traitType":"Coat+Saturation","values":["Normal"]}]&numericTraits=[{"traitType":"Hue","min":20,"max":45}]',
-        golden: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Pattern","values":["Pure"]},{"traitType":"Coat+Saturation","values":["Normal"]}]&numericTraits=[{"traitType":"Hue","min":46,"max":58}]',
-        pikachu: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Coat+Pattern","values":["Tabby"]},{"traitType":"Coat+Saturation","values":["Normal"]}]&numericTraits=[{"traitType":"Hue","min":50,"max":60}]',
-        genesis: 'https://opensea.io/collection/acclimatedmooncats?traits=[{"traitType":"Classification","values":["Genesis"]}]'
-      };
 
       if (!category) {
-        const url = `https://api.opensea.io/api/v2/collections/${slug}/stats`;
+        const url = `https://api.opensea.io/api/v2/collections/${OPENSEA_SLUG}/stats`;
         try {
           const response = await fetch(url, {
             headers: {
@@ -296,130 +446,34 @@ client.on('interactionCreate', async interaction => {
 
       await interaction.editReply(`🔍 Fetching listings for \`${category}\` MoonCats...`);
 
-      // Helper function for parallel processing with concurrency limit
-      async function processBatchesWithLimit(items, batchSize, concurrencyLimit, processFunction) {
-        const batches = [];
-        for (let i = 0; i < items.length; i += batchSize) {
-          batches.push(items.slice(i, i + batchSize));
-        }
+      const exactTraitFilters = floorExactTraitMap[category];
+      const { listingsByToken, error } = exactTraitFilters
+        ? await fetchOpenSeaBestListingsForTraits(exactTraitFilters)
+        : await fetchOpenSeaCollectionListings();
 
-        const results = [];
-        const executing = new Set();
-
-        async function executeBatch(batch) {
-          try {
-            const result = await processFunction(batch);
-            results.push(...result);
-          } catch (error) {
-            console.error(`Error processing batch:`, error);
-          } finally {
-            executing.delete(batch);
-          }
-        }
-
-        // Process batches with concurrency limit
-        while (batches.length > 0 || executing.size > 0) {
-          while (executing.size < concurrencyLimit && batches.length > 0) {
-            const batch = batches.shift();
-            executing.add(batch);
-            executeBatch(batch);
-          }
-          await new Promise(resolve => setTimeout(resolve, 100));
-        }
-
-        return results;
+      if (error) {
+        return await interaction.editReply(`⚠️ Could not fetch listings from OpenSea. ${error}`);
       }
 
-      const batchSize = 30;
-      const concurrencyLimit = 3; // Adjust this value based on rate limits
-
-      const processOpenSeaBatch = async (batch) => {
-        const url = new URL('https://api.opensea.io/api/v2/orders/ethereum/seaport/listings');
-        url.searchParams.append('asset_contract_address', contractAddress);
-        batch.forEach(id => url.searchParams.append('token_ids', id));
-        url.searchParams.append('limit', '50');
-        url.searchParams.append('order_by', 'created_date');
-        url.searchParams.append('order_direction', 'desc');
-
-        const seenTokens = new Set();
-        const listings = [];
-
-        try {
-          let hasMore = true;
-          let cursor = null;
-
-          while (hasMore) {
-            if (cursor) {
-              url.searchParams.set('cursor', cursor);
-            }
-
-            const res = await fetch(url.toString(), {
-              headers: {
-                'Accept': 'application/json',
-                ...(process.env.OPENSEA_API_KEY && { 'X-API-KEY': process.env.OPENSEA_API_KEY })
-              }
-            });
-
-            if (!res.ok) {
-              console.warn(`Failed to fetch batch: ${res.status}`);
-              break;
-            }
-
-            const data = await res.json();
-            
-            for (const order of data.orders || []) {
-              const tokenId = order?.maker_asset_bundle?.assets?.[0]?.token_id;
-              
-              if (seenTokens.has(tokenId)) continue;
-              seenTokens.add(tokenId);
-
-              const priceWeiStr = order?.current_price;
-              if (!priceWeiStr) continue;
-
-              const ethPrice = Number(priceWeiStr) / 1e18;
-              if (ethPrice <= 0) continue;
-
-              listings.push(ethPrice);
-              console.log(`Token ${tokenId}: ${ethPrice.toFixed(2)} ETH`);
-            }
-
-            cursor = data.next;
-            hasMore = Boolean(cursor);
-
-            if (hasMore) {
-              await new Promise(r => setTimeout(r, 300));
-            }
-          }
-
-          return listings;
-        } catch (err) {
-          console.error(`Error fetching batch:`, err);
-          return listings;
-        }
-      };
-
-      const allListings = await processBatchesWithLimit(
-        tokenIds,
-        batchSize,
-        concurrencyLimit,
-        processOpenSeaBatch
-      );
+      const allListings = tokenIds
+        .map(tokenId => listingsByToken.get(tokenId))
+        .filter(price => price != null);
 
       if (!allListings.length) {
         return await interaction.editReply(`❌ No active listings found for \`${category}\`.`);
       }
 
-      const floor = Math.min(...allListings);
-      const emoji = emojiMap[category] || '';
-      const emoji2 = emojiMap2[category] || '';
-      const osUrl = osUrlMap[category] || '';
+      const floor = allListings.reduce((min, price) => price < min ? price : min);
+      const emoji = floorEmojiMap[category] || '';
+      const emoji2 = floorEmojiMap2[category] || '';
+      const osUrl = floorOpenSeaUrlMap[category] || '';
       const row = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
           .setLabel('opensea')
           .setStyle(ButtonStyle.Link)
           .setURL(osUrl)
       );
-      await interaction.editReply({content: `${emoji} **${category}** MoonCats: **${floor.toFixed(2)} E** (${allListings.length} listed) ${emoji2}`, components: [row],});
+      await interaction.editReply({content: `${emoji} **${category}** MoonCats: **${formatWeiToEth(floor)} E** (${allListings.length} listed) ${emoji2}`, components: [row],});
 
     } else {
       await interaction.editReply('Unknown command.');
